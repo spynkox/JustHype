@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Release Tracker</title>
+</head>
+<body>
+    <div class="actions-bar">
+        <button id="import-json" class="action-button">
+            <span class="material-icons">upload_file</span>
+            Import JSON
+        </button>
+        <button id="export-json" class="action-button">
+            <span class="material-icons">download</span>
+            Export JSON
+        </button>
+    </div>
+
+    <div id="monthly-sections"></div>
+
+    <div class="empty-state" id="empty-state">
+        <div class="empty-state-icon">📅</div>
+        <h2 class="empty-state-title">No Releases Yet</h2>
+        <p class="empty-state-text">Start adding your upcoming releases!</p>
+        <button onclick="openForm()" class="empty-state-button">
+            <span class="material-icons">add</span>
+            Add First Release
+        </button>
+    </div>
+
+    <button class="add-release" onclick="openForm()">
+        <span class="material-icons">add</span>
+    </button>
+
+    <div id="release-form-container" class="release-form-container">
+        <div class="form-header">
+            <h3 id="form-title">Add Release</h3>
+            <button id="close-btn" onclick="closeForm()">×</button>
+        </div>
+        
+        <form id="release-form">
+            <input type="text" id="release-title" class="form-input" placeholder="Title" required>
+            <input type="date" id="release-date" class="form-input" required>
+            
+            <div class="platform-tags">
+                <div class="preset-tags">
+                    <button type="button" class="platform-tag" data-platform="Theaters">
+                        <span class="material-icons">movie</span> Theaters
+                    </button>
+                    <button type="button" class="platform-tag" data-platform="Netflix">
+                        <span class="material-icons">tv</span> Netflix
+                    </button>
+                    <button type="button" class="platform-tag" data-platform="Disney+">
+                        <span class="material-icons">tv</span> Disney+
+                    </button>
+                    <button type="button" class="platform-tag" data-platform="Prime Video">
+                        <span class="material-icons">tv</span> Prime Video
+                    </button>
+                </div>
+                <input type="text" id="custom-platform" class="form-input" placeholder="Custom Platform">
+            </div>
+
+            <div class="series-info" style="display: none;">
+                <input type="text" id="episode-number" class="form-input" placeholder="Episode Number (e.g., S01E01)">
+            </div>
+
+            <div class="type-selector">
+                <label>
+                    <input type="radio" name="content-type" value="movie" checked> Movie
+                </label>
+                <label>
+                    <input type="radio" name="content-type" value="series"> TV Series
+                </label>
+            </div>
+
+            <input type="text" id="backdrop" class="form-input" placeholder="Backdrop URL">
+            
+            <button type="submit" class="primary-btn">
+                <span class="material-icons">save</span>
+            </button>
+        </form>
+    </div>
+
+    <input type="file" id="json-import" accept=".json" style="display: none;">
+    <script src="js/script.js"></script>
+</body>
+</html>
