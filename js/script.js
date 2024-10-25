@@ -23,8 +23,17 @@ function saveReleases(releases) {
 
 function groupReleasesByMonth(releases) {
     const grouped = releases.reduce((groups, release) => {
-        const date = new Date(release.date);
-        const key = `${date.getFullYear()}-${date.getMonth()}`;
+        let key;
+
+        if (!release.date) {
+            key = 'TBA';
+        } else if (release.date.length === 4) {
+            key = `${release.date}-13`; // Year-only entries set as "13th month"
+        } else {
+            const date = new Date(release.date);
+            key = `${date.getFullYear()}-${date.getMonth()}`;
+        }
+
         if (!groups[key]) {
             groups[key] = [];
         }
@@ -32,21 +41,44 @@ function groupReleasesByMonth(releases) {
         return groups;
     }, {});
 
-    // Ordina per ogni mese in base alla data
+    // Sort releases within each month
     for (const month in grouped) {
-        grouped[month].sort((a, b) => new Date(a.date) - new Date(b.date));
+        grouped[month].sort((a, b) => {
+            if (!a.date) return 1;  // TBA items go last
+            if (!b.date) return -1;
+            if (a.date.length === 4 && b.date.length === 4) return a.date - b.date;
+            if (a.date.length === 4) return -1;  // Year-only items go first
+            if (b.date.length === 4) return 1;
+            return new Date(a.date) - new Date(b.date);
+        });
     }
 
-    return grouped;
-}
+    // Replace "year-13" keys with just the year
+    const displayGrouped = {};
+    Object.keys(grouped).forEach((key) => {
+        if (key.endsWith('-13')) {
+            const year = key.split('-')[0];
+            displayGrouped[year] = grouped[key]; // Display as year only
+        } else {
+            displayGrouped[key] = grouped[key];
+        }
+    });
 
+    return displayGrouped;
+}
 
 // UI Functions
 function createMonthSection(monthKey, releases) {
     const [year, month] = monthKey.split('-');
-    const date = new Date(year, month);
-    const monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
-    
+    let monthName;
+
+    if (month === "00") {
+        monthName = year; // Solo anno
+    } else {
+        const date = new Date(year, month);
+        monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+    }
+
     const section = document.createElement('div');
     section.className = 'month-section';
     section.innerHTML = `
@@ -67,15 +99,23 @@ function createReleaseCard(release) {
     card.className = 'release-card';
     card.dataset.id = release.id;
 
-    const dateDisplay = release.date ? 
-        new Date(release.date).toLocaleDateString('default', {
+    let dateDisplay;
+    if (!release.date) {
+        dateDisplay = 'TBA';
+    } else if (release.date.length === 4) {
+        // If only year is provided
+        dateDisplay = release.date;
+    } else {
+        // Full date
+        dateDisplay = new Date(release.date).toLocaleDateString('default', {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
-        }) : 'TBA';
+        });
+    }
 
     const episodeInfo = release.isEpisode ? 
-        `<div class="episode-badge">${release.episodeNumber}</div>` : ''; // Removed episode title
+        `<div class="episode-badge">${release.episodeNumber}</div>` : '';
 
     card.innerHTML = `
         <img class="release-backdrop" src="${release.backdrop || '/api/placeholder/300/150'}" 
@@ -248,28 +288,25 @@ function saveRelease(event) {
     const form = document.getElementById('release-form-container');
     const editingId = form.getAttribute('data-editing');
 
-    const isEpisode = document.querySelector('input[name="content-type"]:checked').value === 'series';
+    const isFullDate = document.getElementById('release-date').style.display === 'block';
+    const releaseDate = isFullDate ? document.getElementById('release-date').value : document.getElementById('release-year').value;
 
-    // Define new release data without episodeTitle
     const newRelease = {
         id: editingId || Date.now().toString(),
         title: document.getElementById('release-title').value,
-        date: document.getElementById('release-date').value,
+        date: releaseDate,
         platform: document.getElementById('custom-platform').value,
         backdrop: document.getElementById('backdrop').value,
-        isEpisode: isEpisode,
-        episodeNumber: isEpisode ? document.getElementById('episode-number').value : null,
-        // No episodeTitle
+        isEpisode: document.querySelector('input[name="content-type"]:checked').value === 'series',
+        episodeNumber: document.getElementById('episode-number').value || null
     };
 
     if (editingId) {
-        // Edit existing release
         const index = releases.findIndex(r => r.id === editingId);
         if (index !== -1) {
             releases[index] = { ...releases[index], ...newRelease };
         }
     } else {
-        // Add new release
         releases.push(newRelease);
     }
 
@@ -287,27 +324,40 @@ function editRelease(id) {
     form.setAttribute('data-editing', id);
     document.getElementById('form-title').textContent = 'Edit Release';
 
-    // Populate form fields without episodeTitle
+    // Populate form fields
     document.getElementById('release-title').value = release.title || '';
-    document.getElementById('release-date').value = release.date || '';
+    const dateInput = document.getElementById('release-date');
+    const tbaButton = dateInput.parentElement.querySelector('.tba-toggle');
+    
+    if (release.date === null) {
+        // Handle TBA case
+        tbaButton.classList.add('active');
+        dateInput.disabled = true;
+        dateInput.value = '';
+        dateInput.placeholder = 'To Be Dated';
+    } else {
+        tbaButton.classList.remove('active');
+        dateInput.disabled = false;
+        dateInput.value = release.date || '';
+        dateInput.placeholder = 'Select release date';
+    }
+
     document.getElementById('custom-platform').value = release.platform || '';
     document.getElementById('backdrop').value = release.backdrop || '';
 
-    // Handle series/movie toggle
+    // Handle content type
     const contentType = release.isEpisode ? 'series' : 'movie';
     document.querySelector(`input[name="content-type"][value="${contentType}"]`).checked = true;
     
     const seriesInfo = document.querySelector('.series-info');
     seriesInfo.style.display = release.isEpisode ? 'block' : 'none';
 
-    if (release.isEpisode) {
+    if (release.isEpisode && document.getElementById('episode-number')) {
         document.getElementById('episode-number').value = release.episodeNumber || '';
-        // No longer setting episode title
     }
 
     openForm();
 }
-
 
 function deleteRelease(id) {
     if (!confirm('Are you sure you want to delete this release?')) return;
@@ -323,6 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupPlatformTags();
     setupContentTypeToggle();
     setupJsonHandling();
+    setupDateInput();
     
     // Add form submit handler
     const form = document.getElementById('release-form');
@@ -330,3 +381,48 @@ document.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', saveRelease);
     }
 });
+
+function setupDateInput() {
+    const dateInput = document.getElementById('release-date');
+    const dateContainer = dateInput.parentElement;
+    
+    // Create TBA toggle button
+    const tbaButton = document.createElement('button');
+    tbaButton.type = 'button'; // Prevent form submission
+    tbaButton.className = 'tba-toggle';
+    tbaButton.textContent = 'TBA';
+    dateContainer.appendChild(tbaButton);
+    
+    // TBA toggle functionality
+    let isTBA = false;
+    
+    tbaButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        isTBA = !isTBA;
+        tbaButton.classList.toggle('active');
+        dateInput.disabled = isTBA;
+        dateInput.value = '';
+        
+        if (isTBA) {
+            dateInput.placeholder = 'To Be Announced';
+        } else {
+            dateInput.placeholder = 'Select release date';
+        }
+    });
+}
+
+function toggleDateType() {
+    const dateInput = document.getElementById('release-date');
+    const yearInput = document.getElementById('release-year');
+    const toggleButton = document.querySelector('.toggle-date');
+
+    if (dateInput.style.display === 'none') {
+        dateInput.style.display = 'block';
+        yearInput.style.display = 'none';
+        toggleButton.textContent = 'Year Only';
+    } else {
+        dateInput.style.display = 'none';
+        yearInput.style.display = 'block';
+        toggleButton.textContent = 'Full Date';
+    }
+}

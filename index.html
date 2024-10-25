@@ -9,83 +9,105 @@
     <title>JustHype</title>
 </head>
 <body>
+    <!-- Actions Bar -->
     <div class="actions-bar">
-        <button id="import-json" class="action-button">
+        <button class="action-button" id="import-json">
             <span class="material-icons">upload_file</span>
             Import JSON
         </button>
-        <button id="export-json" class="action-button">
+        <button class="action-button" id="export-json">
             <span class="material-icons">download</span>
             Export JSON
         </button>
+        <input type="file" id="json-import" accept="application/json" style="display: none;">
     </div>
 
+    <!-- Main Content -->
     <div id="monthly-sections"></div>
 
-    <div class="empty-state" id="empty-state">
+    <!-- Empty State -->
+    <div id="empty-state" class="empty-state">
         <div class="empty-state-icon">📅</div>
         <h2 class="empty-state-title">No Releases Yet</h2>
         <p class="empty-state-text">Start adding your upcoming releases!</p>
-        <button onclick="openForm()" class="empty-state-button">
+        <button class="empty-state-button" onclick="openForm()">
             <span class="material-icons">add</span>
             Add First Release
         </button>
     </div>
 
+    <!-- Add Release Button -->
     <button class="add-release" onclick="openForm()">
         <span class="material-icons">add</span>
     </button>
 
+    <!-- Release Form Modal -->
     <div id="release-form-container" class="release-form-container">
-        <div class="form-header">
-            <h3 id="form-title">Add Release</h3>
-            <button id="close-btn" onclick="closeForm()">×</button>
-        </div>
-        
         <form id="release-form">
+            <div class="form-header">
+                <h3 id="form-title">Add Release</h3>
+                <button type="button" onclick="closeForm()" id="close-btn">×</button>
+            </div>
+
+            <!-- Platform Tags -->
+            <div class="preset-tags">
+                <button type="button" class="platform-tag" data-platform="Theaters">
+                    <span class="material-icons">movie</span>
+                    Theaters
+                </button>
+                <button type="button" class="platform-tag" data-platform="Netflix">
+                    <span class="material-icons">tv</span>
+                    Netflix
+                </button>
+                <button type="button" class="platform-tag" data-platform="Disney+">
+                    <span class="material-icons">tv</span>
+                    Disney+
+                </button>
+                <button type="button" class="platform-tag" data-platform="Prime Video">
+                    <span class="material-icons">tv</span>
+                    Prime Video
+                </button>
+            </div>
+
+            <!-- Main Form Fields -->
             <input type="text" id="release-title" class="form-input" placeholder="Title" required>
-            <input type="date" id="release-date" class="form-input" required>
+            <input type="text" id="custom-platform" class="form-input" placeholder="Platform">
+            <input type="text" id="backdrop" class="form-input" placeholder="Backdrop URL (optional)">
             
-            <div class="platform-tags">
-                <div class="preset-tags">
-                    <button type="button" class="platform-tag" data-platform="Theaters">
-                        <span class="material-icons">movie</span> Theaters
-                    </button>
-                    <button type="button" class="platform-tag" data-platform="Netflix">
-                        <span class="material-icons">tv</span> Netflix
-                    </button>
-                    <button type="button" class="platform-tag" data-platform="Disney+">
-                        <span class="material-icons">tv</span> Disney+
-                    </button>
-                    <button type="button" class="platform-tag" data-platform="Prime Video">
-                        <span class="material-icons">tv</span> Prime Video
-                    </button>
-                </div>
-                <input type="text" id="custom-platform" class="form-input" placeholder="Custom Platform">
+            <!-- Date Input with Year-Only Option -->
+            <div class="date-input-container">
+                <input type="date" id="release-date" class="form-input" placeholder="Select release date">
+                <input type="number" id="release-year" class="form-input" placeholder="Year (e.g., 2024)" style="display: none;" min="1900" max="2100">
             </div>
 
-            <div class="series-info" style="display: none;">
-                <input type="text" id="episode-number" class="form-input" placeholder="Episode Number (e.g., S01E01)">
-            </div>
-
+            <!-- Content Type Selection -->
             <div class="type-selector">
                 <label>
-                    <input type="radio" name="content-type" value="movie" checked> Movie
+                    <input type="radio" name="content-type" value="movie" checked>
+                    Movie
                 </label>
                 <label>
-                    <input type="radio" name="content-type" value="series"> TV Series
+                    <input type="radio" name="content-type" value="series">
+                    TV Series
                 </label>
             </div>
 
-            <input type="text" id="backdrop" class="form-input" placeholder="Backdrop URL">
-            
-            <button type="submit" class="primary-btn">
-                <span class="material-icons">save</span>
-            </button>
+            <!-- Series Info (hidden by default) -->
+            <div class="series-info" style="display: none;">
+                <input type="text" id="episode-number" class="form-input" placeholder="Episode Number (e.g. S01E01)">
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="primary-btn">
+                    <span class="material-icons">save</span>
+                    Save
+                </button>
+            </div>
         </form>
     </div>
 
-    <input type="file" id="json-import" accept=".json" style="display: none;">
+    <!-- Scripts -->
     <script src="js/script.js"></script>
 </body>
 </html>
