@@ -24,11 +24,8 @@ function saveReleases(releases) {
 function groupReleasesByMonth(releases) {
     const grouped = releases.reduce((groups, release) => {
         let key;
-
         if (!release.date) {
             key = 'TBA';
-        } else if (release.date.length === 4) {
-            key = `${release.date}-13`; // Year-only entries set as "13th month"
         } else {
             const date = new Date(release.date);
             key = `${date.getFullYear()}-${date.getMonth()}`;
@@ -46,41 +43,27 @@ function groupReleasesByMonth(releases) {
         grouped[month].sort((a, b) => {
             if (!a.date) return 1;  // TBA items go last
             if (!b.date) return -1;
-            if (a.date.length === 4 && b.date.length === 4) return a.date - b.date;
-            if (a.date.length === 4) return -1;  // Year-only items go first
-            if (b.date.length === 4) return 1;
             return new Date(a.date) - new Date(b.date);
         });
     }
 
-    // Replace "year-13" keys with just the year
-    const displayGrouped = {};
-    Object.keys(grouped).forEach((key) => {
-        if (key.endsWith('-13')) {
-            const year = key.split('-')[0];
-            displayGrouped[year] = grouped[key]; // Display as year only
-        } else {
-            displayGrouped[key] = grouped[key];
-        }
-    });
-
-    return displayGrouped;
+    return grouped;
 }
 
 // UI Functions
 function createMonthSection(monthKey, releases) {
-    const [year, month] = monthKey.split('-');
+    const section = document.createElement('div');
+    section.className = 'month-section';
+    
     let monthName;
-
-    if (month === "00") {
-        monthName = year; // Solo anno
+    if (monthKey === 'TBA') {
+        monthName = 'To Be Announced';
     } else {
+        const [year, month] = monthKey.split('-');
         const date = new Date(year, month);
         monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
     }
 
-    const section = document.createElement('div');
-    section.className = 'month-section';
     section.innerHTML = `
         <h2 class="month-header">${monthName}</h2>
         <div class="releases-scroll"></div>
@@ -99,20 +82,12 @@ function createReleaseCard(release) {
     card.className = 'release-card';
     card.dataset.id = release.id;
 
-    let dateDisplay;
-    if (!release.date) {
-        dateDisplay = 'TBA';
-    } else if (release.date.length === 4) {
-        // If only year is provided
-        dateDisplay = release.date;
-    } else {
-        // Full date
-        dateDisplay = new Date(release.date).toLocaleDateString('default', {
+    const dateDisplay = release.date ? 
+        new Date(release.date).toLocaleDateString('default', {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
-        });
-    }
+        }) : 'TBA';
 
     const episodeInfo = release.isEpisode ? 
         `<div class="episode-badge">${release.episodeNumber}</div>` : '';
@@ -162,6 +137,8 @@ function displayReleases() {
     
     Object.entries(grouped)
         .sort(([a], [b]) => {
+            if (a === 'TBA') return 1;
+            if (b === 'TBA') return -1;
             const [yearA, monthA] = a.split('-').map(Number);
             const [yearB, monthB] = b.split('-').map(Number);
             return yearA - yearB || monthA - monthB;
@@ -171,18 +148,91 @@ function displayReleases() {
         });
 }
 
-// Form handling
+// Form Functions
+function openForm() {
+    const form = document.getElementById('release-form-container');
+    if (!form) return;
+    form.classList.add('active');
+}
+
+function closeForm() {
+    const form = document.getElementById('release-form-container');
+    if (!form) return;
+    
+    form.classList.remove('active');
+    form.removeAttribute('data-editing');
+    document.getElementById('release-form').reset();
+    // Reset all form states
+    document.querySelectorAll('.platform-tag').forEach(tag => tag.classList.remove('selected'));
+    
+    // Reset TBA state
+    const dateInput = document.getElementById('release-date');
+    const tbaButton = dateInput?.parentElement.querySelector('.tba-toggle');
+    if (tbaButton) {
+        tbaButton.classList.remove('active');
+        dateInput.disabled = false;
+        dateInput.placeholder = 'Select release date';
+    }
+}
+
+function initializeFormHandlers() {
+    // Add button handlers
+    const addButtons = document.querySelectorAll('[title="Add Release"], [title="Add First Release"]');
+    addButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const form = document.getElementById('release-form-container');
+            form.removeAttribute('data-editing');
+            document.getElementById('form-title').textContent = 'Add Release';
+            document.getElementById('release-form').reset();
+            openForm();
+        });
+    });
+
+    // Close button handler
+    const closeButton = document.querySelector('.form-header .close-button');
+    if (closeButton) {
+        closeButton.addEventListener('click', closeForm);
+    }
+
+    // Form submit handler
+    const form = document.getElementById('release-form');
+    if (form) {
+        form.addEventListener('submit', saveRelease);
+    }
+
+    // Platform tags handler
+    setupPlatformTags();
+
+    // Content type toggle handler
+    setupContentTypeToggle();
+}
+
+// Form Related Setup Functions
 function setupPlatformTags() {
     const container = document.querySelector('.preset-tags');
-    const selectedPlatform = document.getElementById('custom-platform');
-    
+    if (!container) return;
+
     container.addEventListener('click', (e) => {
-        const tag = e.target.closest('.platform-tag');
-        if (!tag) return;
-        
-        document.querySelectorAll('.platform-tag').forEach(t => t.classList.remove('selected'));
-        tag.classList.add('selected');
-        selectedPlatform.value = tag.dataset.platform;
+        // Trova il button.platform-tag più vicino
+        const platformButton = e.target.closest('.platform-tag');
+        if (!platformButton) return;
+
+        // Rimuovi la classe selected da tutti i buttons
+        container.querySelectorAll('.platform-tag').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+
+        // Aggiungi la classe selected al button cliccato
+        platformButton.classList.add('selected');
+
+        // Prendi il valore della piattaforma dal data-attribute
+        const platformValue = platformButton.dataset.platform;
+
+        // Aggiorna il valore dell'input
+        const platformInput = document.getElementById('custom-platform');
+        if (platformInput) {
+            platformInput.value = platformValue;
+        }
     });
 }
 
@@ -192,19 +242,151 @@ function setupContentTypeToggle() {
     
     typeInputs.forEach(input => {
         input.addEventListener('change', (e) => {
-            seriesInfo.style.display = e.target.value === 'series' ? 'block' : 'none';
+            if (seriesInfo) {
+                seriesInfo.style.display = e.target.value === 'series' ? 'block' : 'none';
+            }
         });
     });
 }
 
-// JSON Import/Export
-function setupJsonHandling() {
-    document.getElementById('export-json').addEventListener('click', exportJson);
-    document.getElementById('import-json').addEventListener('click', () => {
-        document.getElementById('json-import').click();
-    });
+function setupDateInput() {
+    const dateInput = document.getElementById('release-date');
+    if (!dateInput) return;
+
+    const dateContainer = dateInput.parentElement;
     
-    document.getElementById('json-import').addEventListener('change', importJson);
+    // Create TBA toggle button if it doesn't exist
+    let tbaButton = dateContainer.querySelector('.tba-toggle');
+    if (!tbaButton) {
+        tbaButton = document.createElement('button');
+        tbaButton.type = 'button';
+        tbaButton.className = 'tba-toggle';
+        tbaButton.textContent = 'TBA';
+        dateContainer.appendChild(tbaButton);
+    }
+    
+    // TBA toggle functionality
+    tbaButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        tbaButton.classList.toggle('active');
+        dateInput.disabled = tbaButton.classList.contains('active');
+        dateInput.value = '';
+        
+        if (dateInput.disabled) {
+            dateInput.placeholder = 'To Be Announced';
+        } else {
+            dateInput.placeholder = 'Select release date';
+        }
+    });
+}
+
+// CRUD Operations
+function saveRelease(event) {
+    event.preventDefault();
+
+    const form = document.getElementById('release-form-container');
+    const releases = getStoredReleases();
+    const editingId = form.getAttribute('data-editing');
+
+    const dateInput = document.getElementById('release-date');
+    const tbaButton = dateInput?.parentElement.querySelector('.tba-toggle');
+    const isTBA = tbaButton?.classList.contains('active');
+
+    const newRelease = {
+        id: editingId || Date.now().toString(),
+        title: document.getElementById('release-title').value,
+        date: isTBA ? null : dateInput.value,
+        platform: document.getElementById('custom-platform').value,
+        backdrop: document.getElementById('backdrop').value,
+        isEpisode: document.querySelector('input[name="content-type"]:checked')?.value === 'series',
+        episodeNumber: document.getElementById('episode-number')?.value || null
+    };
+
+    if (editingId) {
+        const index = releases.findIndex(r => r.id === editingId);
+        if (index !== -1) {
+            releases[index] = { ...releases[index], ...newRelease };
+        }
+    } else {
+        releases.push(newRelease);
+    }
+
+    saveReleases(releases);
+    displayReleases();
+    closeForm();
+}
+
+function editRelease(id) {
+    const releases = getStoredReleases();
+    const release = releases.find(r => r.id === id);
+    if (!release) return;
+
+    const form = document.getElementById('release-form-container');
+    form.setAttribute('data-editing', id);
+    document.getElementById('form-title').textContent = 'Edit Release';
+
+    // Reset form first
+    document.getElementById('release-form').reset();
+
+    // Populate form fields
+    document.getElementById('release-title').value = release.title || '';
+    const dateInput = document.getElementById('release-date');
+    const tbaButton = dateInput?.parentElement.querySelector('.tba-toggle');
+    
+    if (release.date === null) {
+        tbaButton?.classList.add('active');
+        dateInput.disabled = true;
+        dateInput.value = '';
+        dateInput.placeholder = 'To Be Announced';
+    } else {
+        tbaButton?.classList.remove('active');
+        dateInput.disabled = false;
+        dateInput.value = release.date || '';
+    }
+
+    document.getElementById('custom-platform').value = release.platform || '';
+    document.getElementById('backdrop').value = release.backdrop || '';
+
+    const contentTypeInput = document.querySelector(`input[name="content-type"][value="${release.isEpisode ? 'series' : 'movie'}"]`);
+    if (contentTypeInput) {
+        contentTypeInput.checked = true;
+        
+        const seriesInfo = document.querySelector('.series-info');
+        if (seriesInfo) {
+            seriesInfo.style.display = release.isEpisode ? 'block' : 'none';
+        }
+    }
+
+    const episodeNumber = document.getElementById('episode-number');
+    if (episodeNumber && release.isEpisode) {
+        episodeNumber.value = release.episodeNumber || '';
+    }
+
+    openForm();
+}
+
+function deleteRelease(id) {
+    if (!confirm('Are you sure you want to delete this release?')) return;
+
+    const releases = getStoredReleases().filter(release => release.id !== id);
+    saveReleases(releases);
+    displayReleases();
+}
+
+// JSON Import/Export Functions
+function setupJsonHandling() {
+    const exportBtn = document.getElementById('export-json');
+    const importBtn = document.getElementById('import-json');
+    const fileInput = document.getElementById('json-import');
+
+    if (exportBtn) {
+        exportBtn.addEventListener('click', exportJson);
+    }
+    
+    if (importBtn && fileInput) {
+        importBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', importJson);
+    }
 }
 
 function exportJson() {
@@ -234,12 +416,21 @@ async function importJson(event) {
             throw new Error('Invalid format: data must be an array');
         }
         
-        // Validate each release
-        releases.forEach(release => {
-            if (!release.id || !release.title || !release.date) {
-                throw new Error('Invalid release format');
-            }
+        // Enhanced validation
+        const invalidReleases = releases.filter(release => {
+            return !release || typeof release !== 'object' ||
+                   !release.id || typeof release.id !== 'string' ||
+                   !release.title || typeof release.title !== 'string' ||
+                   (release.date !== null && release.date !== undefined && typeof release.date !== 'string') ||
+                   (release.platform && typeof release.platform !== 'string') ||
+                   (release.backdrop && typeof release.backdrop !== 'string') ||
+                   (release.isEpisode && typeof release.isEpisode !== 'boolean') ||
+                   (release.episodeNumber && typeof release.episodeNumber !== 'string');
         });
+
+        if (invalidReleases.length > 0) {
+            throw new Error(`Invalid release format: ${invalidReleases.length} releases failed validation`);
+        }
         
         saveReleases(releases);
         displayReleases();
@@ -247,182 +438,14 @@ async function importJson(event) {
         alert('Releases imported successfully!');
     } catch (e) {
         console.error('Import error:', e);
-        alert('Error importing releases. Please check the file format.');
+        alert(`Import error: ${e.message}`);
     }
-}
-
-// Enhanced form handling
-function openForm() {
-    const form = document.getElementById('release-form-container');
-    if (!form) return;
-    
-    form.classList.add('active');
-    
-    if (!form.hasAttribute('data-editing')) {
-        document.getElementById('form-title').textContent = 'Add Release';
-        document.getElementById('release-form').reset();
-        // Reset platform tags
-        document.querySelectorAll('.platform-tag').forEach(tag => tag.classList.remove('selected'));
-        // Reset series info
-        document.querySelector('input[value="movie"]').checked = true;
-        document.querySelector('.series-info').style.display = 'none';
-    }
-}
-
-function closeForm() {
-    const form = document.getElementById('release-form-container');
-    if (!form) return;
-    
-    form.classList.remove('active');
-    form.removeAttribute('data-editing');
-    document.getElementById('release-form').reset();
-    // Reset all form states
-    document.querySelectorAll('.platform-tag').forEach(tag => tag.classList.remove('selected'));
-}
-
-// Enhanced CRUD Operations
-function saveRelease(event) {
-    event.preventDefault();
-
-    const releases = getStoredReleases();
-    const form = document.getElementById('release-form-container');
-    const editingId = form.getAttribute('data-editing');
-
-    const isFullDate = document.getElementById('release-date').style.display === 'block';
-    const releaseDate = isFullDate ? document.getElementById('release-date').value : document.getElementById('release-year').value;
-
-    const newRelease = {
-        id: editingId || Date.now().toString(),
-        title: document.getElementById('release-title').value,
-        date: releaseDate,
-        platform: document.getElementById('custom-platform').value,
-        backdrop: document.getElementById('backdrop').value,
-        isEpisode: document.querySelector('input[name="content-type"]:checked').value === 'series',
-        episodeNumber: document.getElementById('episode-number').value || null
-    };
-
-    if (editingId) {
-        const index = releases.findIndex(r => r.id === editingId);
-        if (index !== -1) {
-            releases[index] = { ...releases[index], ...newRelease };
-        }
-    } else {
-        releases.push(newRelease);
-    }
-
-    saveReleases(releases);
-    displayReleases();
-    closeForm();
-}
-
-function editRelease(id) {
-    const releases = getStoredReleases();
-    const release = releases.find(r => r.id === id);
-    if (!release) return;
-
-    const form = document.getElementById('release-form-container');
-    form.setAttribute('data-editing', id);
-    document.getElementById('form-title').textContent = 'Edit Release';
-
-    // Populate form fields
-    document.getElementById('release-title').value = release.title || '';
-    const dateInput = document.getElementById('release-date');
-    const tbaButton = dateInput.parentElement.querySelector('.tba-toggle');
-    
-    if (release.date === null) {
-        // Handle TBA case
-        tbaButton.classList.add('active');
-        dateInput.disabled = true;
-        dateInput.value = '';
-        dateInput.placeholder = 'To Be Dated';
-    } else {
-        tbaButton.classList.remove('active');
-        dateInput.disabled = false;
-        dateInput.value = release.date || '';
-        dateInput.placeholder = 'Select release date';
-    }
-
-    document.getElementById('custom-platform').value = release.platform || '';
-    document.getElementById('backdrop').value = release.backdrop || '';
-
-    // Handle content type
-    const contentType = release.isEpisode ? 'series' : 'movie';
-    document.querySelector(`input[name="content-type"][value="${contentType}"]`).checked = true;
-    
-    const seriesInfo = document.querySelector('.series-info');
-    seriesInfo.style.display = release.isEpisode ? 'block' : 'none';
-
-    if (release.isEpisode && document.getElementById('episode-number')) {
-        document.getElementById('episode-number').value = release.episodeNumber || '';
-    }
-
-    openForm();
-}
-
-function deleteRelease(id) {
-    if (!confirm('Are you sure you want to delete this release?')) return;
-
-    const releases = getStoredReleases().filter(release => release.id !== id);
-    saveReleases(releases);
-    displayReleases();
 }
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     displayReleases();
-    setupPlatformTags();
-    setupContentTypeToggle();
-    setupJsonHandling();
+    initializeFormHandlers();
     setupDateInput();
-    
-    // Add form submit handler
-    const form = document.getElementById('release-form');
-    if (form) {
-        form.addEventListener('submit', saveRelease);
-    }
+    setupJsonHandling();
 });
-
-function setupDateInput() {
-    const dateInput = document.getElementById('release-date');
-    const dateContainer = dateInput.parentElement;
-    
-    // Create TBA toggle button
-    const tbaButton = document.createElement('button');
-    tbaButton.type = 'button'; // Prevent form submission
-    tbaButton.className = 'tba-toggle';
-    tbaButton.textContent = 'TBA';
-    dateContainer.appendChild(tbaButton);
-    
-    // TBA toggle functionality
-    let isTBA = false;
-    
-    tbaButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        isTBA = !isTBA;
-        tbaButton.classList.toggle('active');
-        dateInput.disabled = isTBA;
-        dateInput.value = '';
-        
-        if (isTBA) {
-            dateInput.placeholder = 'To Be Announced';
-        } else {
-            dateInput.placeholder = 'Select release date';
-        }
-    });
-}
-
-function toggleDateType() {
-    const dateInput = document.getElementById('release-date');
-    const yearInput = document.getElementById('release-year');
-    const toggleButton = document.querySelector('.toggle-date');
-
-    if (dateInput.style.display === 'none') {
-        dateInput.style.display = 'block';
-        yearInput.style.display = 'none';
-        toggleButton.textContent = 'Year Only';
-    } else {
-        dateInput.style.display = 'none';
-        yearInput.style.display = 'block';
-        toggleButton.textContent = 'Full Date';
-    }
-}
