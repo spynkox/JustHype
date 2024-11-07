@@ -93,7 +93,7 @@ function createReleaseCard(release) {
         `<div class="episode-badge">${release.episodeNumber}</div>` : '';
 
     card.innerHTML = `
-        <img class="release-backdrop" src="${release.backdrop || '/api/placeholder/300/150'}" 
+        <img class="release-backdrop" src="${release.backdrop || 'img/placeholder_backdrop.png'}" 
              alt="Backdrop" onerror="this.src='/api/placeholder/300/150'">
         ${episodeInfo}
         <div class="release-content">
@@ -158,13 +158,14 @@ function openForm() {
 function closeForm() {
     const form = document.getElementById('release-form-container');
     if (!form) return;
-    
+
     form.classList.remove('active');
     form.removeAttribute('data-editing');
     document.getElementById('release-form').reset();
+
     // Reset all form states
     document.querySelectorAll('.platform-tag').forEach(tag => tag.classList.remove('selected'));
-    
+
     // Reset TBA state
     const dateInput = document.getElementById('release-date');
     const tbaButton = dateInput?.parentElement.querySelector('.tba-toggle');
@@ -172,6 +173,12 @@ function closeForm() {
         tbaButton.classList.remove('active');
         dateInput.disabled = false;
         dateInput.placeholder = 'Select release date';
+    }
+
+    // Hide series info section when closing the form
+    const seriesInfo = document.querySelector('.series-info');
+    if (seriesInfo) {
+        seriesInfo.style.display = 'none';
     }
 }
 
@@ -313,6 +320,13 @@ function saveRelease(event) {
 
     saveReleases(releases);
     displayReleases();
+
+    // Hide series info section if not a series
+    const seriesInfo = document.querySelector('.series-info');
+    if (seriesInfo && !newRelease.isEpisode) {
+        seriesInfo.style.display = 'none';
+    }
+
     closeForm();
 }
 
@@ -448,4 +462,28 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeFormHandlers();
     setupDateInput();
     setupJsonHandling();
+});
+
+function togglePlatformDropdown() {
+    const dropdown = document.getElementById("platform-options");
+    dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
+}
+
+function selectPlatform(name) {
+    const input = document.getElementById("custom-platform");
+    input.value = name;
+
+    // Hide the dropdown after selection
+    togglePlatformDropdown();
+}
+
+// Close dropdown if clicked outside or when a platform is selected
+document.addEventListener("click", function(event) {
+    const dropdown = document.getElementById("platform-options");
+    const input = document.getElementById("custom-platform");
+    if (!input.contains(event.target) && !dropdown.contains(event.target)) {
+        dropdown.style.display = "none";
+    } else if (dropdown.contains(event.target)) {
+        dropdown.style.display = "none";
+    }
 });

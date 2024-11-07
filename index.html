@@ -13,11 +13,11 @@
     <div class="actions-bar">
         <button class="action-button" id="import-json">
             <span class="material-icons">upload_file</span>
-            Import JSON
+            Import
         </button>
         <button class="action-button" id="export-json">
             <span class="material-icons">download</span>
-            Export JSON
+            Export
         </button>
         <input type="file" id="json-import" accept="application/json" style="display: none;">
     </div>
@@ -31,7 +31,6 @@
         <h2 class="empty-state-title">No Releases Yet</h2>
         <p class="empty-state-text">Start adding your upcoming releases!</p>
         <button class="empty-state-button" onclick="openForm()">
-            <span class="material-icons">add</span>
             Add First Release
         </button>
     </div>
@@ -49,37 +48,6 @@
                 <button type="button" onclick="closeForm()" id="close-btn">×</button>
             </div>
 
-            <!-- Platform Tags -->
-            <div class="preset-tags">
-                <button type="button" class="platform-tag" data-platform="Theaters">
-                    <span class="material-icons">movie</span>
-                    Theaters
-                </button>
-                <button type="button" class="platform-tag" data-platform="Netflix">
-                    <span class="material-icons">tv</span>
-                    Netflix
-                </button>
-                <button type="button" class="platform-tag" data-platform="Disney+">
-                    <span class="material-icons">tv</span>
-                    Disney+
-                </button>
-                <button type="button" class="platform-tag" data-platform="Prime Video">
-                    <span class="material-icons">tv</span>
-                    Prime Video
-                </button>
-            </div>
-
-            <!-- Main Form Fields -->
-            <input type="text" id="release-title" class="form-input" placeholder="Title" required>
-            <input type="text" id="custom-platform" class="form-input" placeholder="Platform">
-            <input type="text" id="backdrop" class="form-input" placeholder="Backdrop URL (optional)">
-            
-            <!-- Date Input with Year-Only Option -->
-            <div class="date-input-container">
-                <input type="date" id="release-date" class="form-input" placeholder="Select release date">
-                <input type="number" id="release-year" class="form-input" placeholder="Year (e.g., 2024)" style="display: none;" min="1900" max="2100">
-            </div>
-
             <!-- Content Type Selection -->
             <div class="type-selector">
                 <label>
@@ -92,6 +60,33 @@
                 </label>
             </div>
 
+            <!-- Main Form Fields -->
+            <input type="text" id="release-title" class="form-input" placeholder="Title" required>
+            <div class="platform-dropdown" onclick="togglePlatformDropdown()">
+                <input type="text" id="custom-platform" class="form-input" placeholder="Platform" readonly>
+                <div id="platform-options" class="platform-options" style="display: none;">
+                    <div class="platform-option" onclick="selectPlatform('Theaters')">Theaters</div>
+                    <div class="platform-option" onclick="selectPlatform('Netflix')">Netflix</div>
+                    <div class="platform-option" onclick="selectPlatform('Prime Video')">Prime Video</div>
+                    <div class="platform-option" onclick="selectPlatform('Disney+')">Disney+</div>
+                    <div class="platform-option" onclick="selectPlatform('Max')">Max</div>
+                    <div class="platform-option" onclick="selectPlatform('Apple TV+')">Apple TV+</div>
+                    <div class="platform-option" onclick="selectPlatform('Hulu')">Hulu</div>
+                    <div class="platform-option" onclick="selectPlatform('Paramount+')">Paramount+</div>
+                    <div class="platform-option" onclick="selectPlatform('Peacock')">Peacock</div>
+                    <div class="platform-option" onclick="selectPlatform('YouTube')">YouTube</div>
+                    <div class="platform-option" onclick="selectPlatform('Other')">Other</div>
+                </div>
+            </div>
+            
+            <input type="text" id="backdrop" class="form-input" placeholder="Backdrop URL (optional)">
+            
+            <!-- Date Input with Year-Only Option -->
+            <div class="date-input-container">
+                <input type="date" id="release-date" class="form-input" placeholder="Select release date">
+                <input type="number" id="release-year" class="form-input" placeholder="Year (e.g., 2024)" style="display: none;" min="1900" max="2100">
+            </div>
+
             <!-- Series Info (hidden by default) -->
             <div class="series-info" style="display: none;">
                 <input type="text" id="episode-number" class="form-input" placeholder="Episode Number (e.g. S01E01)">
@@ -101,7 +96,6 @@
             <div class="form-actions">
                 <button type="submit" class="primary-btn">
                     <span class="material-icons">save</span>
-                    Save
                 </button>
             </div>
         </form>
