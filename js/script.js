@@ -94,7 +94,7 @@ function createReleaseCard(release) {
 
     card.innerHTML = `
         <img class="release-backdrop" src="${release.backdrop || 'img/placeholder_backdrop.png'}" 
-             alt="Backdrop" onerror="this.src='/api/placeholder/300/150'">
+             alt="Backdrop" onerror="this.src='img/placeholder_backdrop.png'">
         ${episodeInfo}
         <div class="release-content">
             <h3 class="release-title">${release.title || 'Untitled'}</h3>
