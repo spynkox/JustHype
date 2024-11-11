@@ -20,6 +20,12 @@
             Export
         </button>
         <input type="file" id="json-import" accept="application/json" style="display: none;">
+
+        <!-- Add Release Button -->
+        <button class="add-release" onclick="openForm()">
+            <span class="material-icons">add</span>
+            Add Release
+        </button>
     </div>
 
     <!-- Main Content -->
@@ -34,12 +40,7 @@
             Add First Release
         </button>
     </div>
-
-    <!-- Add Release Button -->
-    <button class="add-release" onclick="openForm()">
-        <span class="material-icons">add</span>
-    </button>
-
+    
     <!-- Release Form Modal -->
     <div id="release-form-container" class="release-form-container">
         <form id="release-form">

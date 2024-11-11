@@ -153,6 +153,13 @@ function openForm() {
     const form = document.getElementById('release-form-container');
     if (!form) return;
     form.classList.add('active');
+
+    const editingId = form.getAttribute('data-editing');
+    if (editingId) {
+        document.getElementById('form-title').textContent = 'Edit Release';
+    } else {
+        document.getElementById('form-title').textContent = 'Add Release';
+    }
 }
 
 function closeForm() {
