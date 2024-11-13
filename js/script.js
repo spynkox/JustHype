@@ -89,8 +89,13 @@ function createReleaseCard(release) {
             day: 'numeric'
         }) : 'TBA';
 
-    const episodeInfo = release.isEpisode ? 
-        `<div class="episode-badge">${release.episodeNumber}</div>` : '';
+    const episodeInfo = release.isEpisode && release.season && release.episode ?
+        `<div class="episode-badge">S${release.season} E${release.episode}</div>` : '';
+
+    const autoReleaseButton = release.isEpisode ? `
+        <button onclick="openAutoReleasePopup('${release.id}')" title="Auto-Release Episodes">
+            <span class="material-icons">playlist_add</span>
+        </button>` : '';
 
     card.innerHTML = `
         <img class="release-backdrop" src="${release.backdrop || 'img/placeholder_backdrop.png'}" 
@@ -109,6 +114,7 @@ function createReleaseCard(release) {
                 <button onclick="editRelease('${release.id}')" title="Edit Release">
                     <span class="material-icons">edit</span>
                 </button>
+                ${autoReleaseButton}
                 <button onclick="deleteRelease('${release.id}')" class="delete-btn" title="Delete Release">
                     <span class="material-icons">delete</span>
                 </button>
@@ -313,7 +319,8 @@ function saveRelease(event) {
         platform: document.getElementById('custom-platform').value,
         backdrop: document.getElementById('backdrop').value,
         isEpisode: document.querySelector('input[name="content-type"]:checked')?.value === 'series',
-        episodeNumber: document.getElementById('episode-number')?.value || null
+        season: document.getElementById('season-number')?.value || null,
+        episode: document.getElementById('episode-number')?.value || null
     };
 
     if (editingId) {
@@ -378,10 +385,16 @@ function editRelease(id) {
         }
     }
 
+    const seasonNumber = document.getElementById('season-number');
     const episodeNumber = document.getElementById('episode-number');
-    if (episodeNumber && release.isEpisode) {
-        episodeNumber.value = release.episodeNumber || '';
-    }
+    
+    if (release.isEpisode) {
+        seasonNumber.value = release.season || '';
+        episodeNumber.value = release.episode || '';
+    } else {
+        seasonNumber.value = '';
+        episodeNumber.value = '';
+    }    
 
     openForm();
 }
@@ -446,8 +459,9 @@ async function importJson(event) {
                    (release.platform && typeof release.platform !== 'string') ||
                    (release.backdrop && typeof release.backdrop !== 'string') ||
                    (release.isEpisode && typeof release.isEpisode !== 'boolean') ||
-                   (release.episodeNumber && typeof release.episodeNumber !== 'string');
-        });
+                   (release.season && typeof release.season !== 'string') ||
+                   (release.episode && typeof release.episode !== 'string');
+        });        
 
         if (invalidReleases.length > 0) {
             throw new Error(`Invalid release format: ${invalidReleases.length} releases failed validation`);
@@ -494,3 +508,60 @@ document.addEventListener("click", function(event) {
         dropdown.style.display = "none";
     }
 });
+
+function openAutoReleasePopup(seriesId) {
+    const popup = document.getElementById('auto-release-popup');
+    popup.style.display = 'flex';
+    popup.setAttribute('data-series-id', seriesId);
+}
+
+function closeAutoReleasePopup() {
+    const popup = document.getElementById('auto-release-popup');
+    popup.style.display = 'none';
+    document.getElementById('auto-release-form').reset();
+}
+
+document.getElementById('auto-release-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const seriesId = document.getElementById('auto-release-popup').getAttribute('data-series-id');
+    const totalEpisodes = parseInt(document.getElementById('total-episodes').value, 10);
+    const frequency = document.getElementById('release-frequency').value;
+
+    autoReleaseEpisodes(seriesId, totalEpisodes, frequency);
+    closeAutoReleasePopup();
+});
+
+function autoReleaseEpisodes(seriesId, totalEpisodes, frequency) {
+    const releases = getStoredReleases();
+    const seriesRelease = releases.find(r => r.id === seriesId);
+    if (!seriesRelease || !seriesRelease.date) return;
+
+    const releaseDate = new Date(seriesRelease.date);
+    const newEpisodes = [];
+
+    var existingEpisodes = parseInt(seriesRelease.episode) || 1;
+    var lastEpisode = existingEpisodes + 1;
+
+    if(existingEpisodes > totalEpisodes) {
+        alert('All episodes have already been released.');
+        return;
+    }
+
+    for (let i = lastEpisode; i <= totalEpisodes; i++) {
+        const newRelease = { ...seriesRelease, episode: i, id: `${seriesId}-E${i}` };
+
+        if (frequency === 'daily') {
+            releaseDate.setDate(releaseDate.getDate() + 1);
+        } else if (frequency === 'weekly') {
+            releaseDate.setDate(releaseDate.getDate() + 7);
+        }
+
+        newRelease.date = frequency !== 'all' ? releaseDate.toISOString().split('T')[0] : seriesRelease.date;
+        newEpisodes.push(newRelease);
+    }
+
+    alert(`Auto-releasing ${newEpisodes.length} episodes for ${seriesRelease.title}`);
+
+    saveReleases([...releases, ...newEpisodes]);
+    displayReleases();
+}

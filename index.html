@@ -79,6 +79,12 @@
                     <div class="platform-option" onclick="selectPlatform('Other')">Other</div>
                 </div>
             </div>
+
+            <!-- Series Info (hidden by default) -->
+            <div class="series-info" style="display: none;">
+                <input type="number" id="season-number" class="number-input" placeholder="Season Number" min="1">
+                <input type="number" id="episode-number" class="number-input" placeholder="Episode Number" min="0">
+            </div>
             
             <input type="text" id="backdrop" class="form-input" placeholder="Backdrop URL (optional)">
             
@@ -86,11 +92,6 @@
             <div class="date-input-container">
                 <input type="date" id="release-date" class="form-input" placeholder="Select release date">
                 <input type="number" id="release-year" class="form-input" placeholder="Year (e.g., 2024)" style="display: none;" min="1900" max="2100">
-            </div>
-
-            <!-- Series Info (hidden by default) -->
-            <div class="series-info" style="display: none;">
-                <input type="text" id="episode-number" class="form-input" placeholder="Episode Number (e.g. S01E01)">
             </div>
 
             <!-- Form Actions -->
@@ -101,6 +102,28 @@
             </div>
         </form>
     </div>
+
+    <div id="auto-release-popup" class="popup-container">
+        <div class="popup-content">
+            <div class="form-header">
+                <h3 id="form-title">Add Episodes Release</h3>
+                <button type="button" onclick="closeAutoReleasePopup()" id="close-btn">×</button>
+            </div>
+            <form id="auto-release-form">
+                <input type="number" id="total-episodes" class="form-input" placeholder="Total Episodes" min="1" required>
+
+                <select id="release-frequency" class="form-input" required>
+                    <option value="weekly">Each Week</option>
+                    <option value="all">All at Once</option>
+                    <option value="daily">Each Day</option>
+                </select>
+    
+                <button type="submit" class="primary-btn">
+                    <span class="material-icons">save</span>
+                </button>
+            </form>
+        </div>
+    </div>    
 
     <!-- Scripts -->
     <script src="js/script.js"></script>
