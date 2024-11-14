@@ -89,8 +89,8 @@ function createReleaseCard(release) {
             day: 'numeric'
         }) : 'TBA';
 
-    const episodeInfo = release.isEpisode && release.season && release.episode ?
-        `<div class="episode-badge">S${release.season} E${release.episode}</div>` : '';
+    const episodeInfo = release.isEpisode && release.season ? 
+        `<div class="episode-badge">S${release.season}${release.episode ? ` E${release.episode}` : ''}</div>` : '';
 
     const autoReleaseButton = release.isEpisode ? `
         <button onclick="openAutoReleasePopup('${release.id}')" title="Auto-Release Episodes">
@@ -539,16 +539,19 @@ function autoReleaseEpisodes(seriesId, totalEpisodes, frequency) {
     const releaseDate = new Date(seriesRelease.date);
     const newEpisodes = [];
 
-    var existingEpisodes = parseInt(seriesRelease.episode) || 1;
-    var lastEpisode = existingEpisodes + 1;
+    // Start from episode 1 if the episode is currently null
+    let existingEpisodes = seriesRelease.episode === null ? 1 : parseInt(seriesRelease.episode) || 1;
+    let lastEpisode = existingEpisodes + 1;
 
-    if(existingEpisodes > totalEpisodes) {
+    if (existingEpisodes > totalEpisodes) {
         alert('All episodes have already been released.');
         return;
     }
 
+    // If frequency is daily or weekly, proceed with regular episode release
     for (let i = lastEpisode; i <= totalEpisodes; i++) {
-        const newRelease = { ...seriesRelease, episode: i, id: `${seriesId}-E${i}` };
+        let n = i.toString();
+        const newRelease = { ...seriesRelease, episode: n, id: `${seriesId}-E${i}` };
 
         if (frequency === 'daily') {
             releaseDate.setDate(releaseDate.getDate() + 1);
@@ -556,12 +559,11 @@ function autoReleaseEpisodes(seriesId, totalEpisodes, frequency) {
             releaseDate.setDate(releaseDate.getDate() + 7);
         }
 
-        newRelease.date = frequency !== 'all' ? releaseDate.toISOString().split('T')[0] : seriesRelease.date;
+        newRelease.date = releaseDate.toISOString().split('T')[0];
         newEpisodes.push(newRelease);
     }
 
     alert(`Auto-releasing ${newEpisodes.length} episodes for ${seriesRelease.title}`);
-
     saveReleases([...releases, ...newEpisodes]);
     displayReleases();
 }
