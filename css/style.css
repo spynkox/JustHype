@@ -424,6 +424,24 @@ body::after {
     box-shadow: 0 4px 15px var(--shadow-color);
 }
 
+.github {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    background-color: #24292e;
+    color: var(--accent-color);
+    border: 2px solid var(--accent-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.github:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px var(--shadow-color);
+}
+
 /* Empty State (Centered) */
 .empty-state {
     position: absolute;
