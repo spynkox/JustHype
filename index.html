@@ -1,88 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+    <!-- Meta Tags -->
     <meta charset="UTF-8">
+
+    <!-- Mobile Responsive -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="img/favicon.ico">
-    <link rel="stylesheet" href="css/style.css">
+ 
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css"> <!-- Main Styles -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"> <!-- Material Icons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'> <!-- Boxicons -->
+
+    <!-- Title -->
     <title>JustHype</title>
 </head>
 <body>
-    <!-- Actions Bar -->
-    <div class="actions-bar">
-        <button class="action-button" id="import-json">
-            <span class="material-icons">upload_file</span>
-            Import
-        </button>
-        <button class="action-button" id="export-json">
-            <span class="material-icons">download</span>
-            Export
-        </button>
-        <input type="file" id="json-import" accept="application/json" style="display: none;">
-        <button class="github" id="github" role="link" onclick="location.href='https://github.com/spynkox/JustHype'">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
-                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
-            </svg>
-        </button>
+    <!-- Header -->
+    <header>
+    
+    <!-- Logo -->
+     <div class="logo">JustHype</div>
 
-        <!-- Add Release Button -->
-        <button class="add-release" onclick="openForm()">
-            <span class="material-icons">add</span>
-            Add Release
-        </button>
+    <!-- Actions Bar -->
+    <div class="actions">
+        
+        <div class="actions-box">
+            <button class="add-btn" onclick="openForm()"><i class='bx bx-calendar-plus'></i></button>
+            <button class="settings" id="settings"><i class='bx bx-cog' ></i></button>
+        </div>
+
+        <!-- Dropdown Menu -->
+        <div class="dropdown" id="dropdown" style="display: none;">
+            <button class="action-button" id="github" onclick="location.href='https://github.com/spynkox/JustHype'"><i class='bx bxl-github'></i>View on Github</button>
+            <button class="action-button" id="import-json"><i class='bx bxs-file-import' ></i>Import from JSON</button>
+            <button class="action-button" id="export-json"><i class='bx bxs-file-export' ></i>Export JSON</button>
+            <button class="action-button" id="danger" onclick="removeAllReleases()"><i class='bx bx-trash-alt'></i>Remove all data</button>
+        </div>
+
+        <!-- File Input for JSON Import -->
+        <input type="file" id="json-import" accept="application/json" style="display: none;">
     </div>
+    
+  </header>
 
     <!-- Main Content -->
     <div id="monthly-sections"></div>
 
     <!-- Empty State -->
     <div id="empty-state" class="empty-state">
-        <div class="empty-state-icon">📅</div>
+        <i class='bx bx-calendar-plus'></i>
         <h2 class="empty-state-title">No Releases Yet</h2>
         <p class="empty-state-text">Start adding your upcoming releases!</p>
-        <button class="empty-state-button" onclick="openForm()">
-            Add First Release
-        </button>
     </div>
     
     <!-- Release Form Modal -->
     <div id="release-form-container" class="release-form-container">
         <form id="release-form">
             <div class="form-header">
-                <h3 id="form-title">Add Release</h3>
+                <h3 id="form-title"></h3>
                 <button type="button" onclick="closeForm()" id="close-btn">×</button>
             </div>
 
             <!-- Content Type Selection -->
-            <div class="type-selector">
-                <label>
-                    <input type="radio" name="content-type" value="movie" checked>
-                    Movie
-                </label>
-                <label>
-                    <input type="radio" name="content-type" value="series">
-                    TV Series
-                </label>
+            <div class="type-selector" id="scroll-type-menu">
+                <input type="radio" id="radioMovie" name="content-type" value="movie" checked>
+                <label for="radioMovie"><i class='bx bx-movie'></i>Movie</label>
+
+                <input type="radio" id="radioSeries" name="content-type" value="series">
+                <label for="radioSeries"><i class='bx bx-tv'></i>Series</label>
+
+                <input type="radio" id="radioMusic" name="content-type" value="music">
+                <label for="radioMusic"><i class='bx bx-music'></i>Music</label>
+
+                <input type="radio" id="radioGame" name="content-type" value="game">
+                <label for="radioGame"><i class='bx bx-joystick-alt' ></i>Game</label>
+
+                <input type="radio" id="radioPodcast" name="content-type" value="podcast">
+                <label for="radioPodcast"><i class='bx bx-podcast'></i>Podcast</label>
+
+                <input type="radio" id="radioEvent" name="content-type" value="event">
+                <label for="radioEvent"><i class='bx bx-slideshow' ></i>Event</label>
             </div>
 
             <!-- Main Form Fields -->
             <input type="text" id="release-title" class="form-input" placeholder="Title" required>
             <div class="platform-dropdown" onclick="togglePlatformDropdown()">
                 <input type="text" id="custom-platform" class="form-input" placeholder="Platform" readonly>
-                <div id="platform-options" class="platform-options" style="display: none;">
-                    <div class="platform-option" onclick="selectPlatform('Theaters')">Theaters</div>
-                    <div class="platform-option" onclick="selectPlatform('Netflix')">Netflix</div>
-                    <div class="platform-option" onclick="selectPlatform('Prime Video')">Prime Video</div>
-                    <div class="platform-option" onclick="selectPlatform('Disney+')">Disney+</div>
-                    <div class="platform-option" onclick="selectPlatform('Max')">Max</div>
-                    <div class="platform-option" onclick="selectPlatform('Apple TV+')">Apple TV+</div>
-                    <div class="platform-option" onclick="selectPlatform('Hulu')">Hulu</div>
-                    <div class="platform-option" onclick="selectPlatform('Paramount+')">Paramount+</div>
-                    <div class="platform-option" onclick="selectPlatform('Peacock')">Peacock</div>
-                    <div class="platform-option" onclick="selectPlatform('YouTube')">YouTube</div>
-                    <div class="platform-option" onclick="selectPlatform('Other')">Other</div>
-                </div>
+                <div id="platform-options" class="platform-options" style="display: none;"></div>
             </div>
 
             <!-- Series Info (hidden by default) -->
@@ -95,19 +104,19 @@
             
             <!-- Date Input with Year-Only Option -->
             <div class="date-input-container">
-                <input type="date" id="release-date" class="form-input" placeholder="Select release date">
-                <input type="number" id="release-year" class="form-input" placeholder="Year (e.g., 2024)" style="display: none;" min="1900" max="2100">
+                <input type="date" id="release-date" class="form-input">
             </div>
 
             <!-- Form Actions -->
             <div class="form-actions">
                 <button type="submit" class="primary-btn">
-                    <span class="material-icons">save</span>
+                    <i class='bx bx-save'></i>
                 </button>
             </div>
         </form>
     </div>
 
+    <!-- Auto Release Popup -->
     <div id="auto-release-popup" class="popup-container">
         <div class="popup-content">
             <div class="form-header">
@@ -123,7 +132,7 @@
                 </select>
     
                 <button type="submit" class="primary-btn">
-                    <span class="material-icons">save</span>
+                    <i class='bx bx-save'></i>
                 </button>
             </form>
         </div>

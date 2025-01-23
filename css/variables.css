@@ -1,0 +1,22 @@
+/* Centralized design variables (optional) */
+
+:root {
+    /* Colors */
+    --color-primary: #2d2b3e;
+    --color-secondary: #363148;
+    --color-accent: #b4a5ff;
+    --color-bg: #2d2b3e;
+    --color-text: #ffffff;
+    --color-muted: #888;
+    --shadow-color: rgba(0, 0, 0, 0.2);
+    --error-color: #ff9898;
+    --success-color: #060a06;
+    --glow-color: rgba(180, 165, 255, 0.3);
+    --card-gradient: linear-gradient(145deg, rgba(54, 49, 72, 0.9), rgba(45, 43, 62, 0.9));
+    --card-gradient-blur: linear-gradient(145deg, rgba(54, 49, 72, 0.7), rgba(45, 43, 62, 0.8));
+    --hover-gradient: linear-gradient(145deg, rgba(64, 59, 82, 0.9), rgba(55, 53, 72, 0.9));
+  
+    /* Font */
+    --font-family: 'Kanit';
+}
+  

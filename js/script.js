@@ -1,8 +1,8 @@
 // Constants
 const STORAGE_KEY = 'justhype_releases';
-const PLATFORMS = ['Theaters', 'Netflix', 'Disney+', 'Prime Video'];
+const TYPES = ['movie', 'series', 'music', 'game', 'podcast', 'event'];
 
-// Enhanced utility functions
+// Get Saved Data
 function getStoredReleases() {
     try {
         return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
@@ -12,6 +12,7 @@ function getStoredReleases() {
     }
 }
 
+// Save Data
 function saveReleases(releases) {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(releases));
@@ -21,6 +22,7 @@ function saveReleases(releases) {
     }
 }
 
+// Group Releases by Month
 function groupReleasesByMonth(releases) {
     const grouped = releases.reduce((groups, release) => {
         let key;
@@ -41,7 +43,7 @@ function groupReleasesByMonth(releases) {
     // Sort releases within each month
     for (const month in grouped) {
         grouped[month].sort((a, b) => {
-            if (!a.date) return 1;  // TBA items go last
+            if (!a.date) return 1;  
             if (!b.date) return -1;
             return new Date(a.date) - new Date(b.date);
         });
@@ -50,7 +52,7 @@ function groupReleasesByMonth(releases) {
     return grouped;
 }
 
-// UI Functions
+// Create Month Section
 function createMonthSection(monthKey, releases) {
     const section = document.createElement('div');
     section.className = 'month-section';
@@ -61,7 +63,7 @@ function createMonthSection(monthKey, releases) {
     } else {
         const [year, month] = monthKey.split('-');
         const date = new Date(year, month);
-        monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+        monthName = date.toLocaleString('default', { month: 'long', year: 'numeric'});
     }
 
     section.innerHTML = `
@@ -77,6 +79,7 @@ function createMonthSection(monthKey, releases) {
     return section;
 }
 
+// Create Release Cards
 function createReleaseCard(release) {
     const card = document.createElement('div');
     card.className = 'release-card';
@@ -89,13 +92,17 @@ function createReleaseCard(release) {
             day: 'numeric'
         }) : 'TBA';
 
+    // Show episode badge if it's an episode   
     const episodeInfo = release.isEpisode && release.season ? 
         `<div class="episode-badge">S${release.season}${release.episode ? ` E${release.episode}` : ''}</div>` : '';
-
+        
+    // Show auto-release button for series only
     const autoReleaseButton = release.isEpisode ? `
         <button onclick="openAutoReleasePopup('${release.id}')" title="Auto-Release Episodes">
-            <span class="material-icons">playlist_add</span>
+            <i class='bx bx-calendar-plus'></i>Add Episodes
         </button>` : '';
+
+    const platformBadge = release.platform || 'Platform TBA';
 
     card.innerHTML = `
         <img class="release-backdrop" src="${release.backdrop || 'img/placeholder_backdrop.png'}" 
@@ -104,19 +111,19 @@ function createReleaseCard(release) {
         <div class="release-content">
             <h3 class="release-title">${release.title || 'Untitled'}</h3>
             <p class="release-date">
-                <span class="material-icons">event</span>
+                <i class='bx bx-calendar-event'></i>
                 ${dateDisplay}
             </p>
             <div class="platform-badge">
-                ${release.platform || 'Platform TBA'}
+                ${platformBadge}
             </div>
             <div class="card-actions">
                 <button onclick="editRelease('${release.id}')" title="Edit Release">
-                    <span class="material-icons">edit</span>
+                    <i class='bx bx-edit'></i>
                 </button>
                 ${autoReleaseButton}
                 <button onclick="deleteRelease('${release.id}')" class="delete-btn" title="Delete Release">
-                    <span class="material-icons">delete</span>
+                    <i class='bx bx-trash-alt'></i>
                 </button>
             </div>
         </div>
@@ -124,6 +131,7 @@ function createReleaseCard(release) {
     return card;
 }
 
+// Display Release Cards
 function displayReleases() {
     const container = document.getElementById('monthly-sections');
     const emptyState = document.getElementById('empty-state');
@@ -154,7 +162,7 @@ function displayReleases() {
         });
 }
 
-// Form Functions
+// Adding and Editing Form Open/Close
 function openForm() {
     const form = document.getElementById('release-form-container');
     if (!form) return;
@@ -185,7 +193,6 @@ function closeForm() {
     if (tbaButton) {
         tbaButton.classList.remove('active');
         dateInput.disabled = false;
-        dateInput.placeholder = 'Select release date';
     }
 
     // Hide series info section when closing the form
@@ -195,6 +202,7 @@ function closeForm() {
     }
 }
 
+// Form Handling Functions
 function initializeFormHandlers() {
     // Add button handlers
     const addButtons = document.querySelectorAll('[title="Add Release"], [title="Add First Release"]');
@@ -227,48 +235,81 @@ function initializeFormHandlers() {
     setupContentTypeToggle();
 }
 
-// Form Related Setup Functions
+// Setup Platform Tags
 function setupPlatformTags() {
-    const container = document.querySelector('.preset-tags');
-    if (!container) return;
+    const movieAndSeriesPlatform = ['Theaters', 'Netflix', 'Prime Video', 'Disney+', 'Max', 'Hulu', 'Apple TV+', 'Paramount+', 'Peacock', 'Youtube', 'Other'];
+    const musicPlatform = ['All','Spotify', 'Apple Music', 'YouTube Music', 'Tidal', 'Deezer', 'Amazon Music', 'Pandora', 'Soundcloud', 'Bandcamp', 'Other'];
+    const gamePlatform = ['All','PlayStation', 'Xbox', 'Nintendo', 'Steam', 'Epic Games', 'Other'];
+    const podcastPlatform = ['All','Spotify', 'Apple Podcasts', 'Google Podcasts', 'Amazon Music', 'Stitcher', 'TuneIn', 'iHeartRadio', 'Deezer', 'Podbean', 'Other'];
+    const eventPlatform = ['Online', 'In-Person', 'YouTube', 'Twitch', 'Discord'];
 
-    container.addEventListener('click', (e) => {
-        // Trova il button.platform-tag più vicino
-        const platformButton = e.target.closest('.platform-tag');
-        if (!platformButton) return;
+    const platformOptions = document.getElementById('platform-options');
+    const typeInputs = document.querySelectorAll('input[name="content-type"]');
 
-        // Rimuovi la classe selected da tutti i buttons
-        container.querySelectorAll('.platform-tag').forEach(btn => {
-            btn.classList.remove('selected');
-        });
+    function updatePlatformOptions(contentType) {
+        platformOptions.innerHTML = '';
 
-        // Aggiungi la classe selected al button cliccato
-        platformButton.classList.add('selected');
-
-        // Prendi il valore della piattaforma dal data-attribute
-        const platformValue = platformButton.dataset.platform;
-
-        // Aggiorna il valore dell'input
-        const platformInput = document.getElementById('custom-platform');
-        if (platformInput) {
-            platformInput.value = platformValue;
+        let platforms = [];
+        switch (contentType) {
+            case 'movie':
+            case 'series':
+                platforms = movieAndSeriesPlatform;
+                break;
+            case 'music':
+                platforms = musicPlatform;
+                break;
+            case 'game':
+                platforms = gamePlatform;
+                break;
+            case 'podcast':
+                platforms = podcastPlatform;
+                break;
+            case 'event':
+                platforms = eventPlatform;
+                break;
         }
+
+        platforms.forEach(platform => {
+            const tag = document.createElement('div');
+            tag.className = 'platform-tag';
+            tag.textContent = platform;
+            tag.addEventListener('click', () => selectPlatform(platform));
+            platformOptions.appendChild(tag);
+        });
+    }
+
+    typeInputs.forEach(input => {
+        input.addEventListener('change', () => {
+            updatePlatformOptions(input.value);
+        });
     });
+
+    // Initialize with the first content type selected
+    const initialType = document.querySelector('input[name="content-type"]:checked');
+    if (initialType) {
+        updatePlatformOptions(initialType.value);
+    }
 }
 
+// Setup Content Type Toggle
 function setupContentTypeToggle() {
     const typeInputs = document.querySelectorAll('input[name="content-type"]');
     const seriesInfo = document.querySelector('.series-info');
-    
+    const platformBadge = document.querySelector('.platform-badge');
+
     typeInputs.forEach(input => {
         input.addEventListener('change', (e) => {
             if (seriesInfo) {
                 seriesInfo.style.display = e.target.value === 'series' ? 'block' : 'none';
             }
+            if (platformBadge) {
+                platformBadge.style.display = ['music', 'game', 'podcast', 'event'].includes(e.target.value) ? 'none' : 'block';
+            }
         });
     });
 }
 
+// Setup Date Input
 function setupDateInput() {
     const dateInput = document.getElementById('release-date');
     if (!dateInput) return;
@@ -300,7 +341,7 @@ function setupDateInput() {
     });
 }
 
-// CRUD Operations
+// Save Release Function
 function saveRelease(event) {
     event.preventDefault();
 
@@ -316,9 +357,14 @@ function saveRelease(event) {
         id: editingId || Date.now().toString(),
         title: document.getElementById('release-title').value,
         date: isTBA ? null : dateInput.value,
-        platform: document.getElementById('custom-platform').value,
+        platform: document.getElementById('custom-platform').value || null,
         backdrop: document.getElementById('backdrop').value,
+        isMovie: document.querySelector('input[name="content-type"]:checked')?.value === 'movie',
         isEpisode: document.querySelector('input[name="content-type"]:checked')?.value === 'series',
+        isMusic: document.querySelector('input[name="content-type"]:checked')?.value === 'music',
+        isGame: document.querySelector('input[name="content-type"]:checked')?.value === 'game',
+        isPodcast: document.querySelector('input[name="content-type"]:checked')?.value === 'podcast',
+        isEvent: document.querySelector('input[name="content-type"]:checked')?.value === 'event',
         season: document.getElementById('season-number')?.value || null,
         episode: document.getElementById('episode-number')?.value || null
     };
@@ -341,9 +387,16 @@ function saveRelease(event) {
         seriesInfo.style.display = 'none';
     }
 
+    // Hide platform badge if not a movie or series
+    const platformBadge = document.querySelector('.platform-badge');
+    if (platformBadge && !['movie', 'series'].includes(newRelease.isMovie ? 'movie' : 'series')) {
+        platformBadge.style.display = 'none';
+    }
+
     closeForm();
 }
 
+// Edit Release Function
 function editRelease(id) {
     const releases = getStoredReleases();
     const release = releases.find(r => r.id === id);
@@ -399,6 +452,7 @@ function editRelease(id) {
     openForm();
 }
 
+// Delete Release Function
 function deleteRelease(id) {
     if (!confirm('Are you sure you want to delete this release?')) return;
 
@@ -407,7 +461,7 @@ function deleteRelease(id) {
     displayReleases();
 }
 
-// JSON Import/Export Functions
+// JSON Handling Functions
 function setupJsonHandling() {
     const exportBtn = document.getElementById('export-json');
     const importBtn = document.getElementById('import-json');
@@ -423,6 +477,7 @@ function setupJsonHandling() {
     }
 }
 
+// JSON Export Function
 function exportJson() {
     const releases = getStoredReleases();
     const dataStr = JSON.stringify(releases, null, 2);
@@ -438,6 +493,7 @@ function exportJson() {
     URL.revokeObjectURL(url);
 }
 
+// JSON Import Function
 async function importJson(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -485,11 +541,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setupJsonHandling();
 });
 
+// Custom Platform Dropdown
 function togglePlatformDropdown() {
     const dropdown = document.getElementById("platform-options");
     dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
 }
 
+// Select Platform
 function selectPlatform(name) {
     const input = document.getElementById("custom-platform");
     input.value = name;
@@ -509,18 +567,21 @@ document.addEventListener("click", function(event) {
     }
 });
 
+// Auto-Release Episodes Popup Opening
 function openAutoReleasePopup(seriesId) {
     const popup = document.getElementById('auto-release-popup');
     popup.style.display = 'flex';
     popup.setAttribute('data-series-id', seriesId);
 }
 
+// Auto-Release Episodes Popup Closing
 function closeAutoReleasePopup() {
     const popup = document.getElementById('auto-release-popup');
     popup.style.display = 'none';
     document.getElementById('auto-release-form').reset();
 }
 
+// Auto-Release Episodes Form Submission
 document.getElementById('auto-release-form').addEventListener('submit', function(event) {
     event.preventDefault();
     const seriesId = document.getElementById('auto-release-popup').getAttribute('data-series-id');
@@ -531,6 +592,7 @@ document.getElementById('auto-release-form').addEventListener('submit', function
     closeAutoReleasePopup();
 });
 
+// Auto-Release Episodes Function
 function autoReleaseEpisodes(seriesId, totalEpisodes, frequency) {
     const releases = getStoredReleases();
     const seriesRelease = releases.find(r => r.id === seriesId);
@@ -566,4 +628,18 @@ function autoReleaseEpisodes(seriesId, totalEpisodes, frequency) {
     alert(`Auto-releasing ${newEpisodes.length} episodes for ${seriesRelease.title}`);
     saveReleases([...releases, ...newEpisodes]);
     displayReleases();
+}
+
+// Settings Dropdown
+document.getElementById('settings').addEventListener('click', function() {
+    const dropdown = document.getElementById('dropdown');
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+});
+
+// Remove All Releases Button Logic
+function removeAllReleases() {
+    if (confirm('Are you sure you want to delete all releases?')) {
+        saveReleases([]);
+        displayReleases();
+    }
 }
