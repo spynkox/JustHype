@@ -95,11 +95,11 @@ function createReleaseCard(release) {
         }) : 'TBA';
 
     // Show episode badge if it's an episode   
-    const episodeInfo = release.isEpisode && release.season ? 
+    const episodeInfo = release.isSeries && release.season ? 
         `<div class="episode-badge">S${release.season}${release.episode ? ` E${release.episode}` : ''}</div>` : '';
         
     // Show auto-release button for series only
-    const autoReleaseButton = release.isEpisode ? ` 
+    const autoReleaseButton = release.isSeries ? ` 
         <button onclick="openAutoReleasePopup('${release.id}')" title="Auto-Release Episodes">
             <i class='bx bx-calendar-plus'></i>Add Episodes
         </button>` : '';
@@ -232,7 +232,8 @@ function initializeFormHandlers() {
 // Setup Platform Tags
 function setupPlatformTags() {
     // Platform options for each content type
-    const movieAndSeriesPlatform = ['Theaters', 'Netflix', 'Prime Video', 'Disney+', 'Max', 'Hulu', 'Apple TV+', 'Paramount+', 'Peacock', 'Youtube', 'Other'];
+    const moviePlatform = ['Theaters', 'Netflix', 'Prime Video', 'Disney+', 'Max', 'Hulu', 'Apple TV+', 'Paramount+', 'Peacock', 'Youtube', 'Other'];
+    const seriesPlatform = ['Netflix', 'Prime Video', 'Disney+', 'Max', 'Hulu', 'Apple TV+', 'Paramount+', 'Peacock', 'Youtube', 'Other'];
     const musicPlatform = ['All','Spotify', 'Apple Music', 'YouTube Music', 'Tidal', 'Deezer', 'Amazon Music', 'Pandora', 'Soundcloud', 'Bandcamp', 'Other'];
     const gamePlatform = ['All','PlayStation', 'Xbox', 'Nintendo', 'Steam', 'Epic Games', 'Other'];
     const podcastPlatform = ['All','Spotify', 'Apple Podcasts', 'Google Podcasts', 'Amazon Music', 'Stitcher', 'TuneIn', 'iHeartRadio', 'Deezer', 'Podbean', 'Other'];
@@ -247,8 +248,10 @@ function setupPlatformTags() {
         let platforms = []; // Initialize platforms array
         switch (contentType) { // Check content type
             case 'movie':  // If movie
+                platforms = moviePlatform; // Set platforms
+                break;
             case 'series': // If series
-                platforms = movieAndSeriesPlatform;  // Set platforms
+                platforms = seriesPlatform;  // Set platforms
                 break; 
             case 'music': // If music
                 platforms = musicPlatform; // Set platforms
@@ -264,6 +267,7 @@ function setupPlatformTags() {
                 break;
         }
 
+        // creates options dropdown
         platforms.forEach(platform => { // Loop through each platform
             const tag = document.createElement('div'); // Create tag element
             tag.className = 'platform-tag'; // Add class to tag
@@ -276,6 +280,8 @@ function setupPlatformTags() {
     typeInputs.forEach(input => { // Loop through each content type input
         input.addEventListener('change', () => { // Add change event listener
             updatePlatformOptions(input.value); // Update platform options
+            selectPlatform(''); // Reset platform selection
+            togglePlatformDropdown(); // Toggle platform dropdown
         });
     });
 
@@ -354,7 +360,7 @@ function saveRelease(event) {
         platform: document.getElementById('custom-platform').value || null, // Get platform
         backdrop: document.getElementById('backdrop').value, // Get backdrop
         isMovie: document.querySelector('input[name="content-type"]:checked')?.value === 'movie', // Get content type
-        isEpisode: document.querySelector('input[name="content-type"]:checked')?.value === 'series', // Get content type
+        isSeries: document.querySelector('input[name="content-type"]:checked')?.value === 'series', // Get content type
         isMusic: document.querySelector('input[name="content-type"]:checked')?.value === 'music', // Get content type
         isGame: document.querySelector('input[name="content-type"]:checked')?.value === 'game', // Get content type
         isPodcast: document.querySelector('input[name="content-type"]:checked')?.value === 'podcast', // Get content type
@@ -376,7 +382,7 @@ function saveRelease(event) {
     displayReleases(); // Display releases 
 
     const seriesInfo = document.querySelector('.series-info'); // Get series info section
-    if (seriesInfo && !newRelease.isEpisode) { // Check if series info section exists and it's not an episode
+    if (seriesInfo && !newRelease.isSeries) { // Check if series info section exists and it's not an episode
         seriesInfo.style.display = 'none'; // Hide series info section
     }
 
@@ -395,16 +401,20 @@ function editRelease(id) {
 
     document.getElementById('release-form').reset(); // Reset form first
 
-        // Set content type and show/hide series info section
-        const contentTypeInput = document.querySelector(`input[name="content-type"][value="${TYPES.find(type => release[`is${type.charAt(0).toUpperCase() + type.slice(1)}`])}"]`); // Get content type input
+    // Set content type and show/hide series info section
+    const contentType = TYPES.find(type => release[`is${type.charAt(0).toUpperCase() + type.slice(1)}`]); // Find content type
+    console.log(contentType)
+    if (contentType) { // Check if content type exists
+        const contentTypeInput = document.querySelector(`input[name="content-type"][value="${contentType}"]`); // Get content type input
         if (contentTypeInput) { // Check if content type input exists
             contentTypeInput.checked = true; // Set content type
-            
+
             const seriesInfo = document.querySelector('.series-info'); // Get series info section
             if (seriesInfo) { // Check if series info section exists
-                seriesInfo.style.display = release.isEpisode ? 'block' : 'none'; // Show/hide series info section
+                seriesInfo.style.display = release.isSeries ? 'block' : 'none'; // Show/hide series info section
             }
         }
+    }
     
 
     // Populate form fields
@@ -430,7 +440,7 @@ function editRelease(id) {
     const seasonNumber = document.getElementById('season-number'); // Get season number input
     const episodeNumber = document.getElementById('episode-number'); // Get episode number input
     
-    if (release.isEpisode) { // Check if it's an episode
+    if (release.isSeries) { // Check if it's an episode
         seasonNumber.value = release.season || ''; // Set season number
         episodeNumber.value = release.episode || ''; // Set episode number
     } else {
@@ -503,7 +513,7 @@ async function importJson(event) {
                    (release.date !== null && release.date !== undefined && typeof release.date !== 'string') || // Check if date is a string
                    (release.platform && typeof release.platform !== 'string') || // Check if platform is a string
                    (release.backdrop && typeof release.backdrop !== 'string') || // Check if backdrop is a string
-                   (release.isEpisode && typeof release.isEpisode !== 'boolean') || // Check if isEpisode is a boolean
+                   (release.isSeries && typeof release.isSeries !== 'boolean') || // Check if isSeries is a boolean
                    (release.season && typeof release.season !== 'string') || // Check if season is a string
                    (release.episode && typeof release.episode !== 'string'); // Check if episode is a string
         });        
