@@ -1,3 +1,4 @@
+//MESSY CODE
 // Constants
 const STORAGE_KEY = 'justhype_releases';
 const TYPES = ['movie', 'series', 'music', 'game', 'podcast', 'event'];
