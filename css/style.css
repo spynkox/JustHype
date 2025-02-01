@@ -718,3 +718,38 @@ input[type=number] {
         padding: 0.8rem 1.5rem;
     }
 }
+
+/*Responsive design for mobile devices*/
+@media (max-width: 480px) {
+    .actions-box {
+        left: calc(100% - 11rem);
+    }
+
+    .dropdown {
+        left: calc(100% - 11.5rem);
+        width: 20rem;
+    }
+}
+
+@media (max-width: 320px) {
+    .actions-box {
+        left: calc(100% - 10rem);
+    }
+
+    .dropdown {
+        left: calc(100% - 10.5rem);
+        width: 18rem;
+    }
+}
+
+/*Responsive design for tablets*/
+@media (max-width: 768px) {
+    .actions-box {
+        left: calc(100% - 11rem);
+    }
+
+    .dropdown {
+        left: calc(100% - 11.5rem);
+        width: 20rem;
+    }
+}
