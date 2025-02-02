@@ -331,30 +331,16 @@ body::after {
     font-family: var(--font-family);
 }
 
-.platform-dropdown li {
-    background-size: 20px;
-}
-
 .platform-options {
     position: absolute;
     background-color: var(--color-secondary);
     border: 1px solid var(--color-accent);
     width: 100%;
+    padding: 0.5rem;
+    border-radius: 8px;
     max-height: 200px;
     overflow-y: auto;
     z-index: 10;
-}
-
-.platform-option {
-    display: flex;
-    align-items: center;
-    padding: 8px;
-    cursor: pointer;
-}
-
-.platform-option:hover {
-    background-color: var(--color-accent);
-    color: #2d2b3e;
 }
 
 /* Save Button */
@@ -606,35 +592,6 @@ body::after {
 
 .date-input-container .form-input {
     margin-bottom: 0;
-}
-
-/* TBA Switch */
-.tba-toggle {
-    position: absolute;
-    right: 42px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(180, 165, 255, 0.1);
-    border: 2px solid var(--color-accent);
-    color: var(--color-muted);
-    padding: 0.3rem 0.6rem;
-    border-radius: 50px;
-    font-size: 0.8rem;
-    font-family: var(--font-family);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.tba-toggle:hover {
-    background: rgba(180, 165, 255, 0.2);
-    color: var(--color-text);
-}
-
-.tba-toggle.active {
-    background: var(--color-accent);
-    color: var(--color-primary);
-    border-color: var(--color-accent);
-    right: 14px;
 }
 
 /* Number Input for Episode and Season */

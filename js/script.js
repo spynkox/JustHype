@@ -190,13 +190,6 @@ function closeForm() {
 
     document.querySelectorAll('.platform-tag').forEach(tag => tag.classList.remove('selected')); // Reset platform tags
 
-    const dateInput = document.getElementById('release-date'); // Get date input field
-    const tbaButton = dateInput?.parentElement.querySelector('.tba-toggle'); // Get TBA button
-    if (tbaButton) { // Check if TBA button exists
-        tbaButton.classList.remove('active'); // Remove active class
-        dateInput.disabled = false; // Enable date input
-    }
-
     const seriesInfo = document.querySelector('.series-info'); // Get series info section
     if (seriesInfo) { // Check if series info section exists
         seriesInfo.style.display = 'none'; // Hide series info section
@@ -314,32 +307,6 @@ function setupContentTypeToggle() {
 function setupDateInput() {
     const dateInput = document.getElementById('release-date'); // Get date input field
     if (!dateInput) return; // Exit if date input doesn't exist
-
-    const dateContainer = dateInput.parentElement; // Get date input container
-    
-    // Create TBA toggle button if it doesn't exist
-    let tbaButton = dateContainer.querySelector('.tba-toggle'); // Get TBA button
-    if (!tbaButton) { // Check if TBA button doesn't exist
-        tbaButton = document.createElement('button'); // Create TBA button
-        tbaButton.type = 'button'; // Set button type
-        tbaButton.className = 'tba-toggle'; // Add class to button
-        tbaButton.textContent = 'TBA'; // Set button text
-        dateContainer.appendChild(tbaButton); // Append button to date container
-    }
-    
-    // TBA toggle functionality
-    tbaButton.addEventListener('click', (e) => { // Add click event listener
-        e.preventDefault(); // Prevent default action
-        tbaButton.classList.toggle('active'); // Toggle active class
-        dateInput.disabled = tbaButton.classList.contains('active'); // Disable date input
-        dateInput.value = ''; // Clear date input
-        
-        if (dateInput.disabled) { // Check if date input is disabled
-            dateInput.display = 'none'; // Hide date input
-        } else {
-            dateInput.display = 'block'; // Show date input
-        }
-    });
 }
 
 // Save Release Function
