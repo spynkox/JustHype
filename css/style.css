@@ -710,3 +710,20 @@ input[type=number] {
         width: 20rem;
     }
 }
+
+footer {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 1rem;
+    text-align: center;
+    color: var(--color-text);
+    font-family: var(--font-family);
+    font-size: 0.9rem;
+    border-top: 0.1rem solid var(--color-accent);
+}
+
+footer a {
+    color: var(--color-accent);
+    text-decoration: none;
+}
