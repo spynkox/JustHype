@@ -1,146 +1,390 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 
 <head>
-    <!-- Meta Tags -->
     <meta charset="UTF-8">
-
-    <!-- Mobile Responsive -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
- 
-    <!-- Styles -->
-    <link rel="stylesheet" href="css/style.css"> <!-- Main Styles -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"> <!-- Material Icons -->
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'> <!-- Boxicons -->
-
-    <!-- Title -->
     <title>JustHype</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
 </head>
-<body>
-    <!-- Header -->
-    <header>
-    
-    <!-- Logo -->
-     <div class="logo">JustHype</div>
 
-    <!-- Actions Bar -->
-    <div class="actions">
-        
-        <div class="actions-box">
-            <button class="add-btn" onclick="openForm()"><i class='bx bx-calendar-plus'></i></button>
-            <button class="settings" id="settings"><i class='bx bx-cog' ></i></button>
-        </div>
+<body class="bg-dark-900 text-white min-h-screen font-sans antialiased selection:bg-brand-500 selection:text-white">
 
-        <!-- Dropdown Menu -->
-        <div class="dropdown" id="dropdown" style="display: none;">
-            <button class="action-button" id="github" onclick="location.href='https://github.com/spynkox/JustHype'"><i class='bx bxl-github'></i>View on Github</button>
-            <button class="action-button" id="import-json"><i class='bx bxs-file-import' ></i>Import from JSON</button>
-            <button class="action-button" id="export-json"><i class='bx bxs-file-export' ></i>Export JSON</button>
-            <button class="action-button" id="danger" onclick="removeAllReleases()"><i class='bx bx-trash-alt'></i>Remove all data</button>
-        </div>
-
-        <!-- File Input for JSON Import -->
-        <input type="file" id="json-import" accept="application/json" style="display: none;">
+    <div id="app-bg"
+        class="fixed inset-0 z-0 bg-cover bg-center transition-all duration-1000 opacity-20 transform scale-110 blur-sm">
     </div>
-    
-  </header>
+    <div class="fixed inset-0 z-0 bg-gradient-to-b from-dark-900/50 via-dark-900/80 to-dark-900"></div>
 
-    <!-- Main Content -->
-    <div id="monthly-sections"></div>
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 glass border-b border-white/5 top-0 left-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center">
+                        <a href="index.html">
+                            <i class="fa-solid fa-ticket text-brand-500 text-xl"></i>
+                        </a>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight"><a href="index.html">JustHype</a></span>
+                </div>
 
-    <!-- Empty State -->
-    <div id="empty-state" class="empty-state">
-        <i class='bx bx-calendar-plus'></i>
-        <h2 class="empty-state-title">No Releases Yet</h2>
-        <p class="empty-state-text">Start adding your upcoming releases!</p>
+                <div class="hidden md:flex space-x-1 p-1 rounded-xl glass">
+                    <button
+                        class="filter-btn px-4 py-1.5 rounded-lg text-sm font-medium transition bg-trasparent text-white shadow-lg shadow-brand-500/25"
+                        onclick="filterData('all', this)">All</button>
+                    <button
+                        class="filter-btn px-4 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition"
+                        onclick="filterData('movie', this)">Movies</button>
+                    <button
+                        class="filter-btn px-4 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition"
+                        onclick="filterData('tv', this)">TV</button>
+                    <button
+                        class="filter-btn px-4 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition"
+                        onclick="filterData('music', this)">Music</button>
+                    <button
+                        class="filter-btn px-4 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition"
+                        onclick="filterData('game', this)">Games</button>
+                    <button
+                        class="filter-btn px-4 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition"
+                        onclick="filterData('event', this)">Event</button>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <a class="text-white transition cursor-pointer 
+                                bg-brand-500 w-7 h-7 flex items-center justify-center 
+                                rounded-full
+                                hover:bg-transparent hover:shadow-lg hover:shadow-brand-600/50"
+                        onclick="openAddPopup()">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                    </a>
+
+                    <a id="settingsBtn" class="text-gray-400 hover:text-white transition cursor-pointer"
+                        onclick="showSettings()">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Settings Window -->
+    <div id="settingsWindow"
+        class="hidden fixed z-[60] w-[15rem] bg-[#1a2234] glass border border-white/10 rounded-lg p-3 flex flex-col gap-2 shadow-2xl">
+        <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="importData(event)" />
+        <button id="import-btn"
+            class="import-btn flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-all"
+            onclick="triggerImport()">
+            <i class="fa-solid fa-file-import text-brand-500"></i> Import
+        </button>
+        <button
+            class="export-btn flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-all"
+            onclick="exportData()">
+            <i class="fa-solid fa-file-export text-brand-500"></i> Export
+        </button>
     </div>
-    
-    <!-- Release Form Modal -->
-    <div id="release-form-container" class="release-form-container">
-        <form id="release-form">
-            <div class="form-header">
-                <h3 id="form-title"></h3>
-                <button type="button" onclick="closeForm()" id="close-btn">×</button>
-            </div>
 
-            <!-- Content Type Selection -->
-            <div class="type-selector" id="scroll-type-menu">
-                <input type="radio" id="radioMovie" name="content-type" value="movie" checked>
-                <label for="radioMovie"><i class='bx bx-movie'></i>Movie</label>
-
-                <input type="radio" id="radioSeries" name="content-type" value="series">
-                <label for="radioSeries"><i class='bx bx-tv'></i>Series</label>
-
-                <input type="radio" id="radioMusic" name="content-type" value="music">
-                <label for="radioMusic"><i class='bx bx-music'></i>Music</label>
-
-                <input type="radio" id="radioGame" name="content-type" value="game">
-                <label for="radioGame"><i class='bx bx-joystick-alt' ></i>Game</label>
-
-                <input type="radio" id="radioPodcast" name="content-type" value="podcast">
-                <label for="radioPodcast"><i class='bx bx-podcast'></i>Podcast</label>
-
-                <input type="radio" id="radioEvent" name="content-type" value="event">
-                <label for="radioEvent"><i class='bx bx-slideshow' ></i>Event</label>
-            </div>
-
-            <!-- Main Form Fields -->
-            <input type="text" id="release-title" class="form-input" placeholder="Title" required>
-            <div class="platform-dropdown" onclick="togglePlatformDropdown()">
-                <input type="text" id="custom-platform" class="form-input" placeholder="Platform" readonly>
-                <div id="platform-options" class="platform-options" style="display: none;"></div>
-            </div>
-
-            <!-- Series Info (hidden by default) -->
-            <div class="series-info" style="display: none;">
-                <input type="number" id="season-number" class="number-input" placeholder="Season Number" value="1" min="1">
-                <input type="number" id="episode-number" class="number-input" placeholder="Episode Number" min="0">
-            </div>
-            
-            <input type="text" id="backdrop" class="form-input" placeholder="Backdrop URL (optional)">
-            
-            <!-- Date Input with Year-Only Option -->
-            <div class="date-input-container">
-                <input type="date" id="release-date" class="form-input">
-            </div>
-
-            <!-- Form Actions -->
-            <div class="form-actions">
-                <button type="submit" class="primary-btn">
-                    <i class='bx bx-save'></i>
+    <!-- Add Release Popup -->
+    <div id="addReleasePopup"
+        class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm overflow-y-auto">
+        <div class="bg-[#1a2234] glass border border-white/10 rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl my-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold">Add New Release</h2>
+                <button onclick="closeAddPopup()" class="text-gray-400 hover:text-white transition">
+                    <i class="fa-solid fa-times text-xl"></i>
                 </button>
             </div>
-        </form>
-    </div>
 
-    <!-- Auto Release Popup -->
-    <div id="auto-release-popup" class="popup-container">
-        <div class="popup-content">
-            <div class="form-header">
-                <h3 id="form-title">Add Episodes Release</h3>
-                <button type="button" onclick="closeAutoReleasePopup()" id="close-btn">×</button>
-            </div>
-            <form id="auto-release-form">
-                <input type="number" id="total-episodes" class="form-input" placeholder="Total Episodes" min="1" required>
+            <form id="addReleaseForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Title *</label>
+                    <input type="text" id="input-title" required
+                        class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition">
+                </div>
 
-                <select id="release-frequency" class="form-input" required>
-                    <option value="weekly">Each Week</option>
-                    <option value="daily">Each Day</option>
-                </select>
-    
-                <button type="submit" class="primary-btn">
-                    <i class='bx bx-save'></i>
-                </button>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Type *</label>
+                    <select id="input-type" required
+                        class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition">
+                        <option value="">Select type...</option>
+                        <option value="movie">Movie</option>
+                        <option value="tv">TV Show</option>
+                        <option value="game">Game</option>
+                        <option value="music">Music</option>
+                        <option value="event">Event</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Platform *</label>
+                    <select id="input-platform" required
+                        class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition">
+                        <option value="">Select platform...</option>
+                        <optgroup label="Streaming">
+                            <option value="Netflix">Netflix</option>
+                            <option value="Prime Video">Prime Video</option>
+                            <option value="Disney+">Disney+</option>
+                            <option value="HBO">HBO</option>
+                            <option value="Hulu">Hulu</option>
+                            <option value="Apple TV+">Apple TV+</option>
+                            <option value="Paramount+">Paramount+</option>
+                            <option value="Peacock">Peacock</option>
+                            <option value="Crunchyroll">Crunchyroll</option>
+                            <option value="Youtube">Youtube</option>
+                            <option value="Twitch">Twitch</option>
+                        </optgroup>
+                        <optgroup label="Gaming">
+                            <option value="Playstation">Playstation</option>
+                            <option value="PS5">PS5</option>
+                            <option value="Xbox">Xbox</option>
+                            <option value="Nintendo">Nintendo</option>
+                            <option value="Steam">Steam</option>
+                            <option value="Epic Games">Epic Games</option>
+                            <option value="Android">Android</option>
+                        </optgroup>
+                        <optgroup label="Other">
+                            <option value="Theaters">Theaters</option>
+                            <option value="Online">Online</option>
+                            <option value="In-Person">In-Person</option>
+                            <option value="Event">Event</option>
+                            <option value="Music">Music</option>
+                            <option value="Discord">Discord</option>
+                            <option value="Other">Other</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Release Date</label>
+                    <select id="input-date-type" class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition mb-2" onchange="toggleDateInputs()">
+                        <option value="exact">Exact Date</option>
+                        <option value="year">Year Only</option>
+                        <option value="period">Period (e.g., Summer 2025)</option>
+                        <option value="tba">TBA (To Be Announced)</option>
+                    </select>
+                    <input type="date" id="input-date"
+                        class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition">
+                    <input type="text" id="input-year" placeholder="e.g., 2025"
+                        class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition hidden">
+                    <input type="text" id="input-period" placeholder="e.g., Summer 2025, Q1 2025"
+                        class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition hidden">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Season</label>
+                        <input type="number" id="input-season" min="1" placeholder="1"
+                            class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Episode</label>
+                        <input type="number" id="input-episode" min="1" placeholder="1"
+                            class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Image URL</label>
+                    <input type="url" id="input-image" placeholder="https://... (optional)"
+                        class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition">
+                </div>
+
+                <div class="border-t border-white/5 pt-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-3">Auto-generate Episodes</label>
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" id="input-auto-count" min="1" placeholder="# Episodes"
+                                class="bg-dark-800 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-500 transition">
+                            <select id="input-auto-cadence" class="bg-dark-800 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-500 transition">
+                                <option value="weekly">Weekly</option>
+                                <option value="daily">Daily</option>
+                                <option value="same-day">Same Day</option>
+                            </select>
+                        </div>
+                        <button type="button" onclick="autoGenerateEpisodes()"
+                            class="w-full px-3 py-2 rounded-lg bg-brand-600/20 hover:bg-brand-600/40 text-brand-300 text-sm font-medium transition border border-brand-500/30">
+                            Generate Episodes
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeAddPopup()"
+                        class="flex-1 px-4 py-2 rounded-lg bg-dark-800 hover:bg-dark-700 text-white transition">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                        class="flex-1 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-medium transition">
+                        Add Release
+                    </button>
+                </div>
             </form>
         </div>
-    </div>    
+    </div>
 
-    <!-- Scripts -->
-    <script src="js/script.js"></script>
+    <!-- Edit Release Popup -->
+    <div id="editReleasePopup" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm overflow-y-auto">
+        <div class="bg-[#1a2234] glass border border-white/10 rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl my-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold">Edit Release</h2>
+                <button onclick="closeEditPopup()" class="text-gray-400 hover:text-white transition">
+                    <i class="fa-solid fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <form id="editReleaseForm" class="space-y-4 max-h-[80vh] overflow-y-auto pr-2">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Title *</label>
+                    <input type="text" id="edit-input-title" required
+                        class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Type *</label>
+                    <select id="edit-input-type" required
+                        class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition">
+                        <option value="">Select type...</option>
+                        <option value="movie">Movie</option>
+                        <option value="tv">TV Show</option>
+                        <option value="game">Game</option>
+                        <option value="music">Music</option>
+                        <option value="event">Event</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Platform *</label>
+                    <select id="edit-input-platform" required
+                        class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition">
+                        <option value="">Select platform...</option>
+                        <optgroup label="Streaming">
+                            <option value="Netflix">Netflix</option>
+                            <option value="Prime Video">Prime Video</option>
+                            <option value="Disney+">Disney+</option>
+                            <option value="HBO">HBO</option>
+                            <option value="Hulu">Hulu</option>
+                            <option value="Apple TV+">Apple TV+</option>
+                            <option value="Paramount+">Paramount+</option>
+                            <option value="Peacock">Peacock</option>
+                            <option value="Crunchyroll">Crunchyroll</option>
+                            <option value="Youtube">Youtube</option>
+                            <option value="Twitch">Twitch</option>
+                        </optgroup>
+                        <optgroup label="Gaming">
+                            <option value="Playstation">Playstation</option>
+                            <option value="PS5">PS5</option>
+                            <option value="Xbox">Xbox</option>
+                            <option value="Nintendo">Nintendo</option>
+                            <option value="Steam">Steam</option>
+                            <option value="Epic Games">Epic Games</option>
+                            <option value="Android">Android</option>
+                        </optgroup>
+                        <optgroup label="Other">
+                            <option value="Theaters">Theaters</option>
+                            <option value="Online">Online</option>
+                            <option value="In-Person">In-Person</option>
+                            <option value="Event">Event</option>
+                            <option value="Music">Music</option>
+                            <option value="Discord">Discord</option>
+                            <option value="Other">Other</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Release Date</label>
+                    <select id="edit-input-date-type" class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition mb-2" onchange="toggleEditDateInputs()">
+                        <option value="exact">Exact Date</option>
+                        <option value="year">Year Only</option>
+                        <option value="period">Period (e.g., Summer 2025)</option>
+                        <option value="tba">TBA (To Be Announced)</option>
+                    </select>
+                    <input type="date" id="edit-input-date"
+                        class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition">
+                    <input type="text" id="edit-input-year" placeholder="e.g., 2025"
+                        class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition hidden">
+                    <input type="text" id="edit-input-period" placeholder="e.g., Summer 2025, Q1 2025"
+                        class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition hidden">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Season</label>
+                        <input type="number" id="edit-input-season" min="1" placeholder="1"
+                            class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Episode</label>
+                        <input type="number" id="edit-input-episode" min="1" placeholder="1"
+                            class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Image URL</label>
+                    <input type="url" id="edit-input-image" placeholder="https://... (optional)"
+                        class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-500 transition">
+                </div>
+
+                <div class="border-t border-white/5 pt-4" id="edit-auto-generate-section">
+                    <label class="block text-sm font-medium text-gray-300 mb-3">Auto-generate Episodes</label>
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" id="edit-input-auto-count" min="1" placeholder="# Episodes"
+                                class="bg-dark-800 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-500 transition">
+                            <select id="edit-input-auto-cadence" class="bg-dark-800 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-500 transition">
+                                <option value="weekly">Weekly</option>
+                                <option value="daily">Daily</option>
+                                <option value="same-day">Same Day</option>
+                            </select>
+                        </div>
+                        <button type="button" onclick="autoGenerateEditEpisodes()"
+                            class="w-full px-3 py-2 rounded-lg bg-brand-600/20 hover:bg-brand-600/40 text-brand-300 text-sm font-medium transition border border-brand-500/30">
+                            Generate Episodes
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-4 border-t border-white/5">
+                    <button type="button" onclick="closeEditPopup()"
+                        class="flex-1 px-4 py-2 rounded-lg bg-dark-800 hover:bg-dark-700 text-white transition">
+                        Cancel
+                    </button>
+                    <button type="button" onclick="deleteCurrentRelease()"
+                        class="flex-1 px-4 py-2 rounded-lg bg-red-600/20 hover:bg-red-600/40 text-red-400 font-medium transition border border-red-500/30">
+                        Delete
+                    </button>
+                    <button type="submit"
+                        class="flex-1 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-medium transition">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <main class="relative z-10 pt-24 pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div id="cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        </div>
+    </main>
+    <script src="scripts/data.js"></script>
+    <script src="scripts/utils.js"></script>
+    <script src="scripts/render.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="scripts/popup.js"></script>
 </body>
 
-<footer>Created by <a href="https://github.com/spynkox">@spynkox</a></footer>
+<footer class="fixed w-full z-50 glass border-t border-white/5 left-0 bottom-0 text-center py-3 text-xs text-gray-400">
+    <div class="flex items-center justify-center gap-2">
+        <span>Made by</span>
+        <span class="text-brand-500 font-bold">@spynkox</span>
+        <a href="https://github.com/spynkox/JustHype" target="_blank" class="text-gray-400 hover:text-white transition hover:scale-110 duration-200">
+            <i class="fa-brands fa-github"></i>
+        </a>
+    </div>
+</footer>
+
 </html>

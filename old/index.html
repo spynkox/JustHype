@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Meta Tags -->
+    <meta charset="UTF-8">
+
+    <!-- Mobile Responsive -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+ 
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css"> <!-- Main Styles -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"> <!-- Material Icons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'> <!-- Boxicons -->
+
+    <!-- Title -->
+    <title>JustHype</title>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+    
+    <!-- Logo -->
+     <div class="logo">JustHype</div>
+
+    <!-- Actions Bar -->
+    <div class="actions">
+        
+        <div class="actions-box">
+            <button class="add-btn" onclick="openForm()"><i class='bx bx-calendar-plus'></i></button>
+            <button class="settings" id="settings"><i class='bx bx-cog' ></i></button>
+        </div>
+
+        <!-- Dropdown Menu -->
+        <div class="dropdown" id="dropdown" style="display: none;">
+            <button class="action-button" id="github" onclick="location.href='https://github.com/spynkox/JustHype'"><i class='bx bxl-github'></i>View on Github</button>
+            <button class="action-button" id="import-json"><i class='bx bxs-file-import' ></i>Import from JSON</button>
+            <button class="action-button" id="export-json"><i class='bx bxs-file-export' ></i>Export JSON</button>
+            <button class="action-button" id="danger" onclick="removeAllReleases()"><i class='bx bx-trash-alt'></i>Remove all data</button>
+        </div>
+
+        <!-- File Input for JSON Import -->
+        <input type="file" id="json-import" accept="application/json" style="display: none;">
+    </div>
+    
+  </header>
+
+    <!-- Main Content -->
+    <div id="monthly-sections"></div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="empty-state">
+        <i class='bx bx-calendar-plus'></i>
+        <h2 class="empty-state-title">No Releases Yet</h2>
+        <p class="empty-state-text">Start adding your upcoming releases!</p>
+    </div>
+    
+    <!-- Release Form Modal -->
+    <div id="release-form-container" class="release-form-container">
+        <form id="release-form">
+            <div class="form-header">
+                <h3 id="form-title"></h3>
+                <button type="button" onclick="closeForm()" id="close-btn">×</button>
+            </div>
+
+            <!-- Content Type Selection -->
+            <div class="type-selector" id="scroll-type-menu">
+                <input type="radio" id="radioMovie" name="content-type" value="movie" checked>
+                <label for="radioMovie"><i class='bx bx-movie'></i>Movie</label>
+
+                <input type="radio" id="radioSeries" name="content-type" value="series">
+                <label for="radioSeries"><i class='bx bx-tv'></i>Series</label>
+
+                <input type="radio" id="radioMusic" name="content-type" value="music">
+                <label for="radioMusic"><i class='bx bx-music'></i>Music</label>
+
+                <input type="radio" id="radioGame" name="content-type" value="game">
+                <label for="radioGame"><i class='bx bx-joystick-alt' ></i>Game</label>
+
+                <input type="radio" id="radioPodcast" name="content-type" value="podcast">
+                <label for="radioPodcast"><i class='bx bx-podcast'></i>Podcast</label>
+
+                <input type="radio" id="radioEvent" name="content-type" value="event">
+                <label for="radioEvent"><i class='bx bx-slideshow' ></i>Event</label>
+            </div>
+
+            <!-- Main Form Fields -->
+            <input type="text" id="release-title" class="form-input" placeholder="Title" required>
+            <div class="platform-dropdown" onclick="togglePlatformDropdown()">
+                <input type="text" id="custom-platform" class="form-input" placeholder="Platform" readonly>
+                <div id="platform-options" class="platform-options" style="display: none;"></div>
+            </div>
+
+            <!-- Series Info (hidden by default) -->
+            <div class="series-info" style="display: none;">
+                <input type="number" id="season-number" class="number-input" placeholder="Season Number" value="1" min="1">
+                <input type="number" id="episode-number" class="number-input" placeholder="Episode Number" min="0">
+            </div>
+            
+            <input type="text" id="backdrop" class="form-input" placeholder="Backdrop URL (optional)">
+            
+            <!-- Date Input with Year-Only Option -->
+            <div class="date-input-container">
+                <input type="date" id="release-date" class="form-input">
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="primary-btn">
+                    <i class='bx bx-save'></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Auto Release Popup -->
+    <div id="auto-release-popup" class="popup-container">
+        <div class="popup-content">
+            <div class="form-header">
+                <h3 id="form-title">Add Episodes Release</h3>
+                <button type="button" onclick="closeAutoReleasePopup()" id="close-btn">×</button>
+            </div>
+            <form id="auto-release-form">
+                <input type="number" id="total-episodes" class="form-input" placeholder="Total Episodes" min="1" required>
+
+                <select id="release-frequency" class="form-input" required>
+                    <option value="weekly">Each Week</option>
+                    <option value="daily">Each Day</option>
+                </select>
+    
+                <button type="submit" class="primary-btn">
+                    <i class='bx bx-save'></i>
+                </button>
+            </form>
+        </div>
+    </div>    
+
+    <!-- Scripts -->
+    <script src="js/script.js"></script>
+</body>
+
+<footer>Created by <a href="https://github.com/spynkox">@spynkox</a></footer>
+</html>
