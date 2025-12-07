@@ -293,16 +293,24 @@ function autoGenerateEditEpisodes() {
     const platform = document.getElementById('edit-input-platform').value;
     const image = document.getElementById('edit-input-image').value;
     const season = parseInt(document.getElementById('edit-input-season').value) || 1;
+    const currentEpisode = parseInt(document.getElementById('edit-input-episode').value) || 1;
 
     if (!title || !platform) {
         alert('Compila almeno Titolo e Platform');
         return;
     }
 
-    let currentDate = new Date(startDate);
     const interval = cadence === 'daily' ? 1 : cadence === 'weekly' ? 7 : 0;
+    let currentDate = new Date(startDate);
+    
+    // Start from the next interval (next week, next day, or same day)
+    if (interval > 0) {
+        currentDate = new Date(currentDate.getTime() + interval * 86400000);
+    }
 
-    for (let i = 0; i < count; i++) {
+    // Start from the next episode number
+    for (let i = 1; i <= count; i++) {
+        const episodeNumber = currentEpisode + i;
         const newRelease = {
             id: generateId(),
             title: title,
@@ -312,7 +320,7 @@ function autoGenerateEditEpisodes() {
             dateType: 'exact',
             image: image,
             season: season,
-            episode: i + 1
+            episode: episodeNumber
         };
         
         releases.push(newRelease);
