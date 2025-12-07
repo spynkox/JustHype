@@ -45,7 +45,7 @@ function getNextDate(item) {
     let target = stripTime(new Date(item.date));
     const now = stripTime(new Date());
 
-    if (target > now) {
+    if (target >= now) {
         return target;
     }
 
@@ -73,7 +73,7 @@ function getCountdown(date) {
     
     const total = stripTime(date) - stripTime(new Date());
     
-    if (total <= 0) return { d: 0, h: 0, m: 0, s: 0, finished: true, label: '' };
+    if (total < 0) return { d: 0, h: 0, m: 0, s: 0, finished: true, label: '' };
     
     const days = Math.floor(total / (1000*60*60*24));
     const months = Math.floor(days / 30);
