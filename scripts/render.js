@@ -90,33 +90,41 @@ function render(filter = 'all') {
 
         // Render cards
         card.innerHTML = `
-            <div class="h-48 overflow-hidden relative">
-                <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style="background-image: url('${imageUrl}')"></div>
-                <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-80"></div>
-                ${timeLeftHTML}
-                <div class="absolute bottom-3 left-3 flex gap-1">
-                    ${typeAndEpisodeHTML}
-                </div>
-            </div>
-            <div class="p-5 flex-grow flex flex-col justify-between">
-                <div>
-                    <h3 class="text-lg font-bold leading-tight mb-2 group-hover:text-brand-400 transition">${item.title}</h3>
-                    <div class="flex items-center gap-2 text-xs text-gray-400 mb-4">
-                        <i class="${icon}"></i> ${item.platform}
-                    </div>
-                </div>
-                <div class="pt-4 border-t border-white/5 flex justify-between items-end">
-                    <div class="text-xs text-gray-500">
-                        <div class="uppercase tracking-wider mb-0.5">Release</div>
-                        <div class="text-white font-mono text-sm">${formatDateDisplay(item)}</div>
-                    </div>
-                    <div class="flex items-end gap-1">
-                        <button class="w-8 h-8 rounded-full glass flex items-center justify-center hover:bg-brand-600 transition text-gray-300 hover:text-white" title="Edit" onclick="openEditPopup('${item.id}')">
-                            <i class="fa-regular fa-edit"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
+<div class="group relative w-full aspect-[2/3] md:aspect-video rounded-xl overflow-hidden shadow-2xl bg-dark-800 cursor-pointer">
+    
+    <div class="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110" 
+         style="background-image: url('${imageUrl}')">
+    </div>
+
+    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 p-4 flex flex-col justify-between transition-opacity duration-500">
+        <div class="flex justify-between items-start">
+            ${timeLeftHTML}
+            <div class="flex gap-1">${typeAndEpisodeHTML}</div>
+        </div>
+        
+        <div class="group-hover:opacity-0 transition-opacity duration-300">
+            <p class="text-[10px] uppercase tracking-widest text-gray-400">Release</p>
+            <p class="text-white font-mono font-bold">${formatDateDisplay(item)}</p>
+        </div>
+    </div>
+
+    <div class="absolute inset-0 bg-dark-900/60 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-center items-center p-6 text-center">
+        
+        <h3 class="text-xl font-bold text-white mb-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+            ${item.title}
+        </h3>
+        
+        <div class="flex items-center gap-2 text-sm text-brand-400 mb-6 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+            <i class="${icon}"></i> ${item.platform}
+        </div>
+
+        <div class="flex gap-3 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-700">
+            <button class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold rounded-lg transition" onclick="openEditPopup('${item.id}')">
+                <i class="fa-regular fa-edit mr-2"></i> EDIT DETAILS
+            </button>
+        </div>
+    </div>
+</div>
         `;
         grid.appendChild(card);
     });
