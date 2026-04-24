@@ -68,7 +68,7 @@ function render(filter = 'all') {
                 colorClass = 'text-green-400 shadow-[0_0_10px_rgba(74,222,128,0.3)]';
             }
             
-            timeLeftHTML = `<div class="absolute top-3 right-3 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-white/10 ${colorClass}">
+            timeLeftHTML = `<div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-white/10 ${colorClass}">
                 ${label}
             </div>`;
         } else {
